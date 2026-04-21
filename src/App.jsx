@@ -286,14 +286,7 @@ function App() {
         </div>
 
         <div className="buttons-column" style={{marginTop: '15px'}}>
-          <button className="primary-btn" onClick={() => {
-            setLoading(true);
-            fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => {
-              setLeaderboard(data);
-              setCurrentScreen('leaderboard');
-              setLoading(false);
-            });
-          }}>🏆 Таблица лидеров</button>
+
 
           <button className="secondary-btn" onClick={handleSwitchLanguage}>
             {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
@@ -326,7 +319,7 @@ function App() {
             ))
           )}
         </div>
-        <button className="back-button" onClick={() => setCurrentScreen('profile')}>⬅ Назад</button>
+        <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
