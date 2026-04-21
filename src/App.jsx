@@ -8,6 +8,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState('main');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState([]);
 
   // Состояния для теста
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -88,6 +89,23 @@ function App() {
       finishTest(isCorrect ? correctCount + 1 : correctCount, newSolvedIds, newAnswers);
     }
   };
+  const handleSwitchLanguage = () => {
+    setLoading(true);
+    fetch(`${API_URL}/switch_language`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    .then(() => {
+      // После смены языка заново скачиваем профиль, чтобы обновить данные
+      return fetch(`${API_URL}/get_user_data?user_id=${userId}`);
+    })
+    .then(res => res.json())
+    .then(data => {
+      setUserData(data);
+      setLoading(false);
+    });
+  };
 
   const finishTest = (finalScore, finalIds, finalAnswers) => {
     setCurrentScreen('result');
@@ -124,7 +142,7 @@ function App() {
 
   if (loading) return <div className="loading">Загрузка данных...</div>;
 
-  // === ЭКРАН: ГЛАВНЫЙ ===
+  // === ГЛАВНЫЙ ЭКРАН ===
   if (currentScreen === 'main') {
     return (
       <div className="app-container">
@@ -135,6 +153,7 @@ function App() {
         <div className="buttons-column">
           <button className="primary-btn" onClick={() => setCurrentScreen('training')}>📚 Тренировка</button>
           <button className="secondary-btn" onClick={() => setCurrentScreen('profile')}>👤 Профиль</button>
+          <button className="secondary-btn" onClick={() => setCurrentScreen('help')}>🆘 Помощь</button>
           <button className="danger-btn" onClick={() => tg.close()}>Выход</button>
         </div>
       </div>
@@ -143,12 +162,17 @@ function App() {
 
   // === ЭКРАН: ПРОФИЛЬ ===
   if (currentScreen === 'profile') {
+    const isRu = userData?.language !== 'kg'; // По умолчанию русский
+
     return (
       <div className="screen-container">
         <h2 className="title">👤 Мой профиль</h2>
         <div className="profile-card-real">
            <p>Имя: <b>{userData?.first_name}</b></p>
+           <p>ID: <b>#{userData?.id}</b></p>
            <p>Статус: <span className="role-tag">{userData?.role}</span></p>
+           <p>Язык: <b>{isRu ? '🇷🇺 Русский' : '🇰🇬 Кыргызча'}</b></p>
+
            <div className="stats-grid">
               <div className="stat-item"><span>Алгебра</span><b>{userData?.scores?.algebra}</b></div>
               <div className="stat-item"><span>Геометрия</span><b>{userData?.scores?.geometry}</b></div>
@@ -157,7 +181,72 @@ function App() {
               <div className="stat-item"><span>Чтение</span><b>{userData?.scores?.reading}</b></div>
               <div className="stat-item"><span>Грамматика</span><b>{userData?.scores?.grammar}</b></div>
            </div>
-           <p style={{marginTop: '15px'}}>Решено задач: {userData?.solved_tasks}</p>
+           <p style={{marginTop: '15px'}}>Решено задач: <b>{userData?.solved_tasks}</b></p>
+        </div>
+
+        <div className="buttons-column" style={{marginTop: '15px'}}>
+          <button className="primary-btn" onClick={() => {
+            setLoading(true);
+            fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => {
+              setLeaderboard(data);
+              setCurrentScreen('leaderboard');
+              setLoading(false);
+            });
+          }}>🏆 Таблица лидеров</button>
+
+          <button className="secondary-btn" onClick={handleSwitchLanguage}>
+            {isRu ? '🇰🇬 Переключить на Кыргызча' : '🇷🇺 Переключить на Русский'}
+          </button>
+
+          <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+        </div>
+      </div>
+    );
+  }
+
+  // === ЭКРАН: ТАБЛИЦА ЛИДЕРОВ ===
+  if (currentScreen === 'leaderboard') {
+    const medals = ['🥇', '🥈', '🥉'];
+    return (
+      <div className="screen-container">
+        <h2 className="title">🏆 ТОП-10 УЧЕНИКОВ</h2>
+        <div className="profile-card-real" style={{padding: '10px 20px'}}>
+          {leaderboard.length === 0 ? (
+            <p style={{textAlign: 'center'}}>Пока нет данных.</p>
+          ) : (
+            leaderboard.map((user, idx) => (
+              <div key={user.id} style={{display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee'}}>
+                <span>
+                  {idx < 3 ? medals[idx] : `${idx + 1}. `}
+                  <b>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
+                </span>
+                <span style={{color: '#3aa1e9', fontWeight: 'bold'}}>{user.total_score} б.</span>
+              </div>
+            ))
+          )}
+        </div>
+        <button className="back-button" onClick={() => setCurrentScreen('profile')}>⬅ Назад</button>
+      </div>
+    );
+  }
+
+  // === ЭКРАН: ПОМОЩЬ ===
+  if (currentScreen === 'help') {
+    return (
+      <div className="screen-container">
+        <h2 className="title">🆘 Помощь</h2>
+        <div className="profile-card-real" style={{textAlign: 'left'}}>
+          <p>📖 <b>Инструкция по использованию:</b></p>
+          <ol style={{paddingLeft: '20px', marginTop: '10px', lineHeight: '1.6'}}>
+            <li>Жми «Тренировка», чтобы решать задачи.</li>
+            <li>Если у тебя VIP, ИИ даст подробный разбор ошибок в конце теста.</li>
+            <li>Твой ID в профиле нужен для оплаты VIP-статуса.</li>
+            <li>Язык тестов можно поменять в настройках Профиля.</li>
+          </ol>
+          <p style={{marginTop: '20px'}}>📞 <b>Связь с поддержкой:</b></p>
+          <a href="https://t.me/Altin_Supprot_bot" target="_blank" style={{color: '#3aa1e9', textDecoration: 'none', display: 'block', marginTop: '5px'}}>
+            @Altin_Supprot_bot
+          </a>
         </div>
         <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
