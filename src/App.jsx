@@ -73,13 +73,14 @@ function App() {
     return (
       <div className="screen-container">
         <h2 className="title">📚 Предметы</h2>
-        <div className="subjects-grid">
-          {['Алгебра', 'Геометрия', 'Аналогии', 'Дополнение предложений', 'Чтение и понимание', 'Грамматика'].map(subject => (
-            <button key={subject} className="subject-card" onClick={() => handleStartTraining(subject)}>
-              <span className="subject-name">{subject}</span>
-            </button>
-          ))}
-        </div>
+        // Найди этот блок в функции App:
+<div className="subjects-grid">
+  {['Алгебра', 'Геометрия'].map(subject => (
+    <button key={subject} className="subject-card" onClick={() => handleStartTraining(subject)}>
+      <span className="subject-name">{subject}</span>
+    </button>
+  ))}
+</div>
         <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
