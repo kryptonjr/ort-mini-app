@@ -383,3 +383,113 @@
   border: 2px solid #a44040; /* Темно-красная рамка */
   box-shadow: none;
 }
+/* =========================================
+   НОВЫЙ ДИЗАЙН ПРОФИЛЯ
+   ========================================= */
+
+.modern-profile-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.profile-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.profile-avatar {
+  font-size: 2rem;
+  background: rgba(0,0,0,0.05);
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.modern-profile-header h2 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #111;
+}
+
+.profile-greeting {
+  font-size: 1.2rem;
+  margin: 5px 0;
+  color: #333;
+}
+
+.profile-meta {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Сетка карточек в профиле */
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card-modern {
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s;
+}
+
+.stat-icon-glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #444;
+  font-weight: 600;
+}
+
+.stat-score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111;
+}
+
+/* Подвал профиля */
+.tasks-solved {
+  text-align: center;
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.tasks-solved b {
+  color: #111;
+}
+
+/* Синяя кнопка переключения языка как на картинке */
+.lang-btn {
+  background: linear-gradient(135deg, #2f80ed, #1565c0);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3);
+}

@@ -266,33 +266,80 @@ function App() {
     const isRu = userData?.language !== 'kg';
 
     return (
-      <div className="screen-container">
-        <h2 className="title">👤 Мой профиль</h2>
-        <div className="profile-card-real">
-           <p>Имя: <b>{userData?.first_name}</b></p>
-           <p>ID: <b>#{userData?.id}</b></p>
-           <p>Статус: <span className="role-tag">{userData?.role}</span></p>
-           <p>Язык: <b>{isRu ? 'Русский' : 'Кыргызча'}</b></p>
-
-           <div className="stats-grid">
-              <div className="stat-item"><span>Алгебра</span><b>{userData?.scores?.algebra}</b></div>
-              <div className="stat-item"><span>Геометрия</span><b>{userData?.scores?.geometry}</b></div>
-              <div className="stat-item"><span>Аналогии</span><b>{userData?.scores?.analogies}</b></div>
-              <div className="stat-item"><span>Доп. предлож.</span><b>{userData?.scores?.sentences}</b></div>
-              <div className="stat-item"><span>Чтение</span><b>{userData?.scores?.reading}</b></div>
-              <div className="stat-item"><span>Грамматика</span><b>{userData?.scores?.grammar}</b></div>
-           </div>
-           <p style={{marginTop: '15px'}}>Решено задач: <b>{userData?.solved_tasks}</b></p>
+      <div className="app-container modern-ui">
+        {/* Шапка профиля */}
+        <div className="modern-profile-header">
+          <div className="modern-logo" style={{ marginBottom: '15px' }}>🧬 O.R.T. AI</div>
+          <div className="profile-title">
+            <span className="profile-avatar">👨‍🎓</span>
+            <h2>Мой профиль</h2>
+          </div>
+          <p className="profile-greeting">Привет, {userData?.first_name || 'Ученик'}!</p>
+          <p className="profile-meta">#ID: {userData?.id} | {userData?.role}</p>
         </div>
 
-        <div className="buttons-column" style={{marginTop: '15px'}}>
+        {/* Сетка баллов */}
+        <div className="profile-stats-grid">
+          <div className="stat-card-modern subj-blue">
+            <div className="stat-icon-glass">🧮</div>
+            <div className="stat-text">
+              <span className="stat-label">Алгебра</span>
+              <span className="stat-score">{userData?.scores?.algebra || 0} pts</span>
+            </div>
+          </div>
 
+          <div className="stat-card-modern subj-green">
+            <div className="stat-icon-glass">📐</div>
+            <div className="stat-text">
+              <span className="stat-label">Геометрия</span>
+              <span className="stat-score">{userData?.scores?.geometry || 0} pts</span>
+            </div>
+          </div>
 
-          <button className="secondary-btn" onClick={handleSwitchLanguage}>
-            {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
+          <div className="stat-card-modern subj-purple">
+            <div className="stat-icon-glass">🔗</div>
+            <div className="stat-text">
+              <span className="stat-label">Аналогии</span>
+              <span className="stat-score">{userData?.scores?.analogies || 0} pts</span>
+            </div>
+          </div>
+
+          <div className="stat-card-modern subj-orange">
+            <div className="stat-icon-glass">📝</div>
+            <div className="stat-text">
+              <span className="stat-label">Доп. предлож.</span>
+              <span className="stat-score">{userData?.scores?.sentences || 0} pts</span>
+            </div>
+          </div>
+
+          <div className="stat-card-modern subj-teal">
+            <div className="stat-icon-glass">📖</div>
+            <div className="stat-text">
+              <span className="stat-label">Чтение</span>
+              <span className="stat-score">{userData?.scores?.reading || 0} pts</span>
+            </div>
+          </div>
+
+          <div className="stat-card-modern subj-red">
+            <div className="stat-icon-glass">🅰️</div>
+            <div className="stat-text">
+              <span className="stat-label">Грамматика</span>
+              <span className="stat-score">{userData?.scores?.grammar || 0} pts</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Подвал профиля */}
+        <div className="profile-footer">
+          <p className="tasks-solved">Решено задач: <b>{userData?.solved_tasks || 0}</b></p>
+
+          <button className="modern-btn lang-btn" onClick={handleSwitchLanguage}>
+            {isRu ? '🇰🇬 Переключить на Кыргызча' : '🇷🇺 Переключить на Русский'}
           </button>
 
-          <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+          <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
+            ⬅ Назад
+          </button>
         </div>
       </div>
     );
