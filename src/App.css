@@ -1,74 +1,29 @@
-/* Новые стили для Профиля и Тренировок */
-.screen-container {
+.task-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 20px;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.profile-stats {
-  display: flex;
-  gap: 15px;
-  width: 100%;
-  max-width: 350px;
   justify-content: space-between;
-}
-
-.stat-card {
-  background: #f4f6f8;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-  flex: 1;
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #3aa1e9;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 5px;
-  display: block;
-}
-
-.subjects-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
   width: 100%;
-  max-width: 350px;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
 }
-
-.subject-card {
+.task-content {
   background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+.answer-input {
+  width: 100%;
+  padding: 15px;
   border: 2px solid #edf2f7;
-  border-radius: 14px;
-  padding: 20px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  outline: none;
+  transition: border 0.2s;
 }
-
-.subject-card:active {
-  transform: scale(0.95);
-  border-color: #3aa1e9;
-}
-
-.subject-icon {
-  font-size: 2rem;
-  margin-bottom: 10px;
-}
-
-.subject-name {
-  font-weight: 600;
-  color: #333;
-}
+.answer-input:focus { border-color: #3aa1e9; }
+.submit-btn { width: 100%; margin-top: auto; }
