@@ -371,25 +371,58 @@ function App() {
     );
   }
 
-  // ЭКРАН 4: ПОМОЩЬ
+  // === ЭКРАН: ПОМОЩЬ (MODERN UI) ===
   if (currentScreen === 'help') {
+    // Список пунктов инструкции с иконками и цветами
+    const helpInstructions = [
+      { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
+      { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
+      { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
+      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' }
+    ];
+
     return (
-      <div className="screen-container">
-        <h2 className="title">🆘 Помощь</h2>
-        <div className="profile-card-real" style={{textAlign: 'left'}}>
-          <p>📖 <b>Инструкция по использованию:</b></p>
-          <ol style={{paddingLeft: '20px', marginTop: '10px', lineHeight: '1.6'}}>
-            <li>Жми «Тренировка», чтобы решать задачи.</li>
-            <li>Если у тебя VIP, ИИ даст подробный разбор ошибок в конце теста.</li>
-            <li>Твой ID в профиле нужен для оплаты VIP-статуса.</li>
-            <li>Язык тестов можно поменять в настройках Профиля.</li>
-          </ol>
-          <p style={{marginTop: '20px'}}>📞 <b>Связь с поддержкой:</b></p>
-          <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{color: '#3aa1e9', textDecoration: 'none', display: 'block', marginTop: '5px'}}>
-            @Altin_Supprot_bot
-          </a>
+      <div className="app-container modern-ui help-modern">
+        {/* Шапка */}
+        <div className="modern-header" style={{ marginBottom: '30px' }}>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            🆘 Помощь
+          </h2>
         </div>
-        <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+
+        {/* Сетка инструкции (4 карточки) */}
+        <div className="modern-dashboard-grid help-cards-grid">
+          {helpInstructions.map((item, idx) => (
+            <div key={idx} className={`stat-card-modern ${item.colorClass}`}>
+              <div className="stat-icon-glass">{item.icon}</div>
+              <div className="stat-text">
+                <span className="stat-label help-title-modern">{item.name}</span>
+                <span className="stat-score help-subtitle">{item.text}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Блок Связи (Dashboard-стиль) */}
+        <div className="modern-dashboard-grid" style={{ marginBottom: '20px' }}>
+           <div className="stat-card-modern vip-support-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '15px' }}>
+              <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div>
+              <div className="stat-text" style={{ textAlign: 'left' }}>
+                <span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span>
+                <span className="stat-score help-subtitle">Связаться с нами</span>
+              </div>
+              {/* Ссылка */}
+              <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
+                <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto' }}>@Altin_Supprot_bot</button>
+              </a>
+           </div>
+        </div>
+
+        {/* Кнопка Назад */}
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
+          ⬅ Назад
+        </button>
       </div>
     );
   }

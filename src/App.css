@@ -493,3 +493,57 @@
   border: none;
   box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3);
 }
+/* =========================================
+   ЭКРАН ПОМОЩИ (MODERN UI)
+   ========================================= */
+
+.help-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+/* Переиспользуем стиль карточки stat-card-modern из предметов, но адаптируем */
+.help-cards-grid .stat-card-modern {
+  flex-direction: column;
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.help-title-modern {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.help-subtitle {
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.4;
+  height: 48px; /* Фиксированная высота для выравнивания */
+  display: flex;
+  align-items: center;
+}
+
+/* Стили для блока поддержки */
+.vip-support-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.vip-support-btn:active {
+  transform: scale(0.98);
+}
+
+.vip-support-btn .modern-btn {
+  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+  color: #3aa1e9;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+}
