@@ -111,3 +111,190 @@
   color: #3aa1e9;
   margin-top: 4px;
 }
+
+/* =========================================
+   НОВЫЙ ДИЗАЙН ГЛАВНОГО ЭКРАНА (MODERN UI)
+   ========================================= */
+
+.modern-ui {
+  background: #f4f7fb; /* Светлый фон как на макете */
+  min-height: 100vh;
+  padding: 20px 15px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.modern-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.modern-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #111;
+}
+
+.modern-header h2 {
+  font-size: 1.4rem;
+  margin: 0 0 5px 0;
+  color: #222;
+}
+
+.modern-header .subtitle {
+  color: #777;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Главная карточка (Синий градиент) */
+.main-action-card {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  color: white;
+  box-shadow: 0 10px 20px rgba(9, 132, 227, 0.3);
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.main-action-card:active {
+  transform: scale(0.97);
+}
+
+.card-icon-large {
+  font-size: 3rem;
+  background: rgba(255,255,255,0.2);
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  margin-right: 15px;
+}
+
+.card-text h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.5rem;
+}
+
+.card-text p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+/* Сетка из 3 карточек */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dash-card {
+  border-radius: 16px;
+  padding: 15px 10px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+  cursor: pointer;
+}
+
+.dash-card h4 {
+  margin: 10px 0 5px 0;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.dash-card p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.dash-icon {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.profile-card { background: linear-gradient(135deg, #f3e5f5, #e1bee7); }
+.help-card { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
+.leader-card { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
+
+/* Секция Баллов */
+.scores-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  margin-bottom: 20px;
+}
+
+.section-title {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.scores-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.score-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+}
+
+.score-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.score-label { font-size: 0.75rem; color: #555; font-weight: bold; margin-bottom: 8px; text-align: center; height: 24px;}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #eee;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.fill { height: 100%; border-radius: 10px; }
+.math-fill { background: #3498db; }
+.grammar-fill { background: #2ecc71; }
+.reading-fill { background: #e74c3c; }
+
+.score-val { font-size: 0.7rem; color: #888; }
+
+/* Нижние кнопки */
+.modern-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vip-btn {
+  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+  color: #333;
+}
+
+.exit-btn {
+  background: white;
+  color: #e74c3c;
+  border: 1px solid #ffeaea;
+}

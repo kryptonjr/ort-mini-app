@@ -169,18 +169,94 @@ function App() {
 
   // ЭКРАН 1: ГЛАВНЫЙ
   if (currentScreen === 'main') {
+    // Считаем общую сумму баллов для профиля
+    const totalScore = userData?.scores
+      ? Object.values(userData.scores).reduce((a, b) => a + b, 0)
+      : 0;
+
     return (
-      <div className="app-container">
-        <div className="header">
-          <h1>🧬 O.R.T. AI</h1>
-          <p>Привет, {userData?.first_name}!</p>
+      <div className="app-container modern-ui">
+        {/* Шапка */}
+        <div className="modern-header">
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
+          <p className="subtitle">Твой ИИ-помощник к ОРТ</p>
         </div>
-        <div className="buttons-column">
-          <button className="primary-btn" onClick={() => setCurrentScreen('training')}>📚 Тренировка</button>
-          <button className="secondary-btn" onClick={() => setCurrentScreen('profile')}>👤 Профиль</button>
-          <button className="secondary-btn" onClick={() => setCurrentScreen('help')}>🆘 Помощь</button>
-          <button className="danger-btn" onClick={() => tg.close()}>Выход</button>
+
+        {/* Главная кнопка тренировки */}
+        <div className="main-action-card" onClick={() => setCurrentScreen('training')}>
+          <div className="card-icon-large">📖</div>
+          <div className="card-text">
+            <h3>Тренировка</h3>
+            <p>Начать подготовку</p>
+          </div>
         </div>
+
+        {/* Сетка из 3 кнопок */}
+        <div className="dashboard-grid">
+          <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
+            <div className="dash-icon">👤</div>
+            <h4>Профиль</h4>
+            <p>{totalScore} баллов</p>
+          </div>
+
+          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
+            <div className="dash-icon">🆘</div>
+            <h4>Помощь</h4>
+            <p>Инструкции</p>
+          </div>
+
+          <div className="dash-card leader-card" onClick={() => {
+            setLoading(true);
+            fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => {
+              setLeaderboard(data);
+              setCurrentScreen('leaderboard');
+              setLoading(false);
+            });
+          }}>
+            <div className="dash-icon">🏆</div>
+            <h4>ТОП-10</h4>
+            <p>Лидеры</p>
+          </div>
+        </div>
+
+        {/* Блок "Мои Баллы" */}
+        <div className="scores-section">
+          <h3 className="section-title">Мои Баллы</h3>
+          <div className="scores-row">
+            {/* Математика (Алгебра + Геометрия) */}
+            <div className="score-col">
+              <div className="score-icon">🧮</div>
+              <span className="score-label">Math</span>
+              <div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div>
+              <span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span>
+            </div>
+
+            {/* Грамматика */}
+            <div className="score-col">
+              <div className="score-icon">📜</div>
+              <span className="score-label">Grammar</span>
+              <div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div>
+              <span className="score-val">{userData?.scores?.grammar || 0} pts</span>
+            </div>
+
+            {/* Чтение */}
+            <div className="score-col">
+              <div className="score-icon">👁️</div>
+              <span className="score-label">Reading</span>
+              <div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div>
+              <span className="score-val">{userData?.scores?.reading || 0} pts</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Нижние кнопки */}
+        <button className="modern-btn vip-btn" onClick={() => alert('VIP-статус приобретается через поддержку!')}>
+          🚀 VIP Разбор ИИ
+        </button>
+        <button className="modern-btn exit-btn" onClick={() => tg.close()}>
+          🚪 Выход
+        </button>
       </div>
     );
   }
