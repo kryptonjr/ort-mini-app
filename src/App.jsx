@@ -5,26 +5,28 @@ const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
 
 function App() {
+  // === СОСТОЯНИЯ ПРИЛОЖЕНИЯ ===
   const [currentScreen, setCurrentScreen] = useState('main');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
 
-  // Состояния для теста
+  // === СОСТОЯНИЯ ТЕСТА И ТАЙМЕРА ===
   const [selectedSubject, setSelectedSubject] = useState('');
   const [tasks, setTasks] = useState([]);
   const [currentTaskIdx, setCurrentTaskIdx] = useState(0);
   const [answerInput, setAnswerInput] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [solvedIds, setSolvedIds] = useState([]);
-  const [userAnswers, setUserAnswers] = useState([]); // Храним ответы для ИИ
-  const [aiFeedback, setAiFeedback] = useState("");   // Текст от ИИ
-  const [isAiLoading, setIsAiLoading] = useState(false); // Загрузка ИИ
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [aiFeedback, setAiFeedback] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0); // Время в секундах
 
   // ID пользователя
   const userId = tg.initDataUnsafe?.user?.id || 1014543443;
 
-  // --- Загрузка профиля при старте ---
+  // --- 1. ЗАГРУЗКА ПРОФИЛЯ ПРИ СТАРТЕ ---
   useEffect(() => {
     tg.ready();
     tg.expand();
@@ -41,27 +43,52 @@ function App() {
       });
   }, []);
 
-  // --- 1. Клик по предмету ---
+  // --- 2. ЛОГИКА ТАЙМЕРА ---
+  useEffect(() => {
+    if (currentScreen === 'solving' && timeLeft > 0) {
+      const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      return () => clearInterval(timerId);
+    } else if (currentScreen === 'solving' && timeLeft === 0) {
+      alert("⏱ Время вышло! Тест завершен автоматически.");
+      finishTest(correctCount, solvedIds, userAnswers);
+    }
+  }, [currentScreen, timeLeft]);
+
+  // --- 3. ФУНКЦИИ КНОПОК И НАВИГАЦИИ ---
   const handleSubjectClick = (subject) => {
     setSelectedSubject(subject);
     setCurrentScreen('amount_select');
   };
 
-
-  // --- 2. Скачиваем задачи с сервера (Исправленная версия) ---
   const handleStartTest = (amount) => {
     setLoading(true);
     const encodedSubject = encodeURIComponent(selectedSubject);
+
     fetch(`${API_URL}/get_tasks?user_id=${userId}&subject=${encodedSubject}&amount=${amount}`)
       .then(res => res.json())
       .then(data => {
         if (!Array.isArray(data) || data.length === 0) {
           alert("Ты решил все задачи по этому предмету!");
-          setLoading(false); return;
+          setLoading(false);
+          setCurrentScreen('training');
+          return;
         }
-        setTasks(data); setCurrentTaskIdx(0); setCorrectCount(0);
-        setSolvedIds([]); setUserAnswers([]); setAiFeedback("");
-        setCurrentScreen('solving'); setLoading(false);
+        // Сброс всех настроек перед новым тестом
+        setTasks(data);
+        setCurrentTaskIdx(0);
+        setCorrectCount(0);
+        setSolvedIds([]);
+        setUserAnswers([]);
+        setAiFeedback("");
+        setTimeLeft(amount * 60); // Даем по 1 минуте на каждую задачу
+
+        setCurrentScreen('solving');
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Ошибка загрузки задач.");
+        setLoading(false);
       });
   };
 
@@ -71,7 +98,6 @@ function App() {
 
     if (isCorrect) setCorrectCount(prev => prev + 1);
 
-    // Сохраняем ответ пользователя для отправки ИИ
     const newAnswers = [...userAnswers, {
       task: currentTask,
       userAnswer: answerInput,
@@ -89,29 +115,11 @@ function App() {
       finishTest(isCorrect ? correctCount + 1 : correctCount, newSolvedIds, newAnswers);
     }
   };
-  const handleSwitchLanguage = () => {
-    setLoading(true);
-    fetch(`${API_URL}/switch_language`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
-    })
-    .then(() => {
-      // После смены языка заново скачиваем профиль, чтобы обновить данные
-      return fetch(`${API_URL}/get_user_data?user_id=${userId}`);
-    })
-    .then(res => res.json())
-    .then(data => {
-      setUserData(data);
-      setLoading(false);
-    });
-  };
 
   const finishTest = (finalScore, finalIds, finalAnswers) => {
     setCurrentScreen('result');
     setIsAiLoading(true);
 
-    // Фильтруем только НЕВЕРНЫЕ ответы для ИИ
     const wrongTasks = finalAnswers
       .filter(ans => !ans.isCorrect)
       .map(ans => ({
@@ -129,7 +137,7 @@ function App() {
         subject: selectedSubject,
         correct_count: finalScore,
         solved_ids: finalIds,
-        wrong_tasks: wrongTasks // Отправляем ошибки на бэкэнд
+        wrong_tasks: wrongTasks
       })
     })
     .then(res => res.json())
@@ -139,10 +147,27 @@ function App() {
     });
   };
 
+  const handleSwitchLanguage = () => {
+    setLoading(true);
+    fetch(`${API_URL}/switch_language`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
+    .then(res => res.json())
+    .then(data => {
+      setUserData(data);
+      setLoading(false);
+    });
+  };
+
+
+  // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
   if (loading) return <div className="loading">Загрузка данных...</div>;
 
-  // === ГЛАВНЫЙ ЭКРАН ===
+  // ЭКРАН 1: ГЛАВНЫЙ
   if (currentScreen === 'main') {
     return (
       <div className="app-container">
@@ -160,9 +185,9 @@ function App() {
     );
   }
 
-  // === ЭКРАН: ПРОФИЛЬ ===
+  // ЭКРАН 2: ПРОФИЛЬ
   if (currentScreen === 'profile') {
-    const isRu = userData?.language !== 'kg'; // По умолчанию русский
+    const isRu = userData?.language !== 'kg';
 
     return (
       <div className="screen-container">
@@ -171,7 +196,7 @@ function App() {
            <p>Имя: <b>{userData?.first_name}</b></p>
            <p>ID: <b>#{userData?.id}</b></p>
            <p>Статус: <span className="role-tag">{userData?.role}</span></p>
-           <p>Язык: <b>{isRu ? '🇷🇺' : '🇰🇬'}</b></p>
+           <p>Язык: <b>{isRu ? 'Русский' : 'Кыргызча'}</b></p>
 
            <div className="stats-grid">
               <div className="stat-item"><span>Алгебра</span><b>{userData?.scores?.algebra}</b></div>
@@ -195,7 +220,7 @@ function App() {
           }}>🏆 Таблица лидеров</button>
 
           <button className="secondary-btn" onClick={handleSwitchLanguage}>
-            {isRu ? '🇰🇬 Переключить на Кыргызча' : '🇷🇺 Переключить на Русский'}
+            {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
           </button>
 
           <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
@@ -204,7 +229,7 @@ function App() {
     );
   }
 
-  // === ЭКРАН: ТАБЛИЦА ЛИДЕРОВ ===
+  // ЭКРАН 3: ТАБЛИЦА ЛИДЕРОВ
   if (currentScreen === 'leaderboard') {
     const medals = ['🥇', '🥈', '🥉'];
     return (
@@ -230,7 +255,7 @@ function App() {
     );
   }
 
-  // === ЭКРАН: ПОМОЩЬ ===
+  // ЭКРАН 4: ПОМОЩЬ
   if (currentScreen === 'help') {
     return (
       <div className="screen-container">
@@ -244,7 +269,7 @@ function App() {
             <li>Язык тестов можно поменять в настройках Профиля.</li>
           </ol>
           <p style={{marginTop: '20px'}}>📞 <b>Связь с поддержкой:</b></p>
-          <a href="https://t.me/Altin_Supprot_bot" target="_blank" style={{color: '#3aa1e9', textDecoration: 'none', display: 'block', marginTop: '5px'}}>
+          <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{color: '#3aa1e9', textDecoration: 'none', display: 'block', marginTop: '5px'}}>
             @Altin_Supprot_bot
           </a>
         </div>
@@ -253,7 +278,7 @@ function App() {
     );
   }
 
-  // === ЭКРАН: ТРЕНИРОВКА (ВЫБОР ПРЕДМЕТА) ===
+  // ЭКРАН 5: ТРЕНИРОВКА (ВЫБОР ПРЕДМЕТА)
   if (currentScreen === 'training') {
     return (
       <div className="screen-container">
@@ -270,7 +295,7 @@ function App() {
     );
   }
 
-  // === ЭКРАН: ВЫБОР КОЛИЧЕСТВА ===
+  // ЭКРАН 6: ВЫБОР КОЛИЧЕСТВА ЗАДАЧ
   if (currentScreen === 'amount_select') {
     return (
       <div className="screen-container">
@@ -286,17 +311,23 @@ function App() {
     );
   }
 
-
-  // === ЭКРАН: САМ ТЕСТ ===
+  // ЭКРАН 7: САМ ТЕСТ (С ТАЙМЕРОМ)
   if (currentScreen === 'solving') {
     const currentTask = tasks[currentTaskIdx];
     const images = currentTask.image_url ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
 
+    // Форматируем время таймера для вывода (мм:сс)
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    const timeString = `${m}:${s < 10 ? '0' : ''}${s}`;
+
     return (
       <div className="screen-container">
-        <div className="task-header">
-          <span>{selectedSubject}</span>
-          <span>Вопрос {currentTaskIdx + 1} из {tasks.length}</span>
+        <div className="task-header" style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+          <span>{selectedSubject} ({currentTaskIdx + 1}/{tasks.length})</span>
+          <span style={{ fontWeight: 'bold', color: timeLeft < 60 ? '#e74c3c' : '#333' }}>
+            ⏱ {timeString}
+          </span>
         </div>
 
         <div className="task-content">
@@ -308,7 +339,6 @@ function App() {
           <p className="task-text">{currentTask.question}</p>
         </div>
 
-        {/* Поле ввода теперь сразу под вопросом! */}
         <div className="answer-section">
           <input
             type="text"
@@ -329,7 +359,7 @@ function App() {
     );
   }
 
-  // === ЭКРАН: РЕЗУЛЬТАТ ===
+  // ЭКРАН 8: РЕЗУЛЬТАТ И ИИ-РАЗБОР
   if (currentScreen === 'result') {
     return (
       <div className="screen-container">
@@ -339,7 +369,6 @@ function App() {
           <h1 style={{color: '#3aa1e9', margin: '10px 0'}}>{correctCount} / {tasks.length}</h1>
         </div>
 
-        {/* Блок с обратной связью от ИИ */}
         <div className="ai-feedback-box">
           {isAiLoading ? (
             <div className="ai-loading">🤖 Нейросеть проверяет ответы...</div>
