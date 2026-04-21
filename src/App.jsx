@@ -3,7 +3,7 @@ import './App.css';
 
 const tg = window.Telegram.WebApp;
 // ТВОЯ НОВАЯ ССЫЛКА ДЛЯ API
-const API_URL = "https://7964f1b78dc386.lhr.life";
+const API_URL = "https://ort-bot.ru";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('main');
