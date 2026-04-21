@@ -16,6 +16,9 @@ function App() {
   const [answerInput, setAnswerInput] = useState('');
   const [correctCount, setCorrectCount] = useState(0);
   const [solvedIds, setSolvedIds] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]); // Храним ответы для ИИ
+  const [aiFeedback, setAiFeedback] = useState("");   // Текст от ИИ
+  const [isAiLoading, setIsAiLoading] = useState(false); // Загрузка ИИ
 
   // ID пользователя
   const userId = tg.initDataUnsafe?.user?.id || 1014543443;
@@ -47,68 +50,59 @@ function App() {
   // --- 2. Скачиваем задачи с сервера (Исправленная версия) ---
   const handleStartTest = (amount) => {
     setLoading(true);
-
-    // Кодируем предмет (чтобы Алгебра не превратилась в кракозябры)
     const encodedSubject = encodeURIComponent(selectedSubject);
-    const url = `${API_URL}/get_tasks?user_id=${userId}&subject=${encodedSubject}&amount=${amount}`;
-
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
-        return res.json();
-      })
+    fetch(`${API_URL}/get_tasks?user_id=${userId}&subject=${encodedSubject}&amount=${amount}`)
+      .then(res => res.json())
       .then(data => {
         if (!Array.isArray(data) || data.length === 0) {
-          alert("Задач по этому предмету пока нет или ты всё решил!");
-          setLoading(false);
-          setCurrentScreen('training');
-          return;
+          alert("Ты решил все задачи по этому предмету!");
+          setLoading(false); return;
         }
-        setTasks(data);
-        setCurrentTaskIdx(0);
-        setCorrectCount(0);
-        setSolvedIds([]);
-        setCurrentScreen('solving');
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Критическая ошибка загрузки:", err);
-        alert("Не удалось загрузить задачи. Проверь консоль сервера.");
-        setLoading(false); // Выключаем загрузку, чтобы экран не висел
-        setCurrentScreen('training');
+        setTasks(data); setCurrentTaskIdx(0); setCorrectCount(0);
+        setSolvedIds([]); setUserAnswers([]); setAiFeedback("");
+        setCurrentScreen('solving'); setLoading(false);
       });
   };
 
-  // --- 3. Обработка ответа юзера ---
   const handleNextTask = () => {
     const currentTask = tasks[currentTaskIdx];
-    let isCorrect = false;
+    const isCorrect = answerInput.trim().toLowerCase() === String(currentTask.correct_answer).trim().toLowerCase();
 
-    // Сравниваем ответ (без учета регистра и пробелов)
-    if (answerInput.trim().toLowerCase() === String(currentTask.correct_answer).trim().toLowerCase()) {
-      setCorrectCount(prev => prev + 1);
-      isCorrect = true;
-    }
+    if (isCorrect) setCorrectCount(prev => prev + 1);
 
-    // Записываем ID задачи
+    // Сохраняем ответ пользователя для отправки ИИ
+    const newAnswers = [...userAnswers, {
+      task: currentTask,
+      userAnswer: answerInput,
+      isCorrect: isCorrect
+    }];
+    setUserAnswers(newAnswers);
+
     const newSolvedIds = [...solvedIds, currentTask.id];
     setSolvedIds(newSolvedIds);
-
-    // Очищаем поле ввода
     setAnswerInput('');
 
-    // Идем дальше или заканчиваем тест
     if (currentTaskIdx + 1 < tasks.length) {
       setCurrentTaskIdx(prev => prev + 1);
     } else {
-      finishTest(isCorrect ? correctCount + 1 : correctCount, newSolvedIds);
+      finishTest(isCorrect ? correctCount + 1 : correctCount, newSolvedIds, newAnswers);
     }
   };
 
-  // --- 4. Финиш теста и отправка данных в БД ---
-  const finishTest = (finalScore, finalIds) => {
+  const finishTest = (finalScore, finalIds, finalAnswers) => {
     setCurrentScreen('result');
-    // Отправляем результаты на сервер
+    setIsAiLoading(true);
+
+    // Фильтруем только НЕВЕРНЫЕ ответы для ИИ
+    const wrongTasks = finalAnswers
+      .filter(ans => !ans.isCorrect)
+      .map(ans => ({
+        question: ans.task.question,
+        correct_answer: ans.task.correct_answer,
+        user_answer: ans.userAnswer,
+        explanation: ans.task.explanation
+      }));
+
     fetch(`${API_URL}/save_result`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -116,8 +110,14 @@ function App() {
         user_id: userId,
         subject: selectedSubject,
         correct_count: finalScore,
-        solved_ids: finalIds
+        solved_ids: finalIds,
+        wrong_tasks: wrongTasks // Отправляем ошибки на бэкэнд
       })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setAiFeedback(data.ai_feedback);
+      setIsAiLoading(false);
     });
   };
 
@@ -197,52 +197,41 @@ function App() {
   // === ЭКРАН: САМ ТЕСТ ===
   if (currentScreen === 'solving') {
     const currentTask = tasks[currentTaskIdx];
-
-    // Подготовка списка картинок (разбиваем строку по пробелам или запятым)
-    const images = currentTask.image_url
-      ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "")
-      : [];
+    const images = currentTask.image_url ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
 
     return (
-      <div className="screen-container solving-screen">
+      <div className="screen-container">
         <div className="task-header">
           <span>{selectedSubject}</span>
           <span>Вопрос {currentTaskIdx + 1} из {tasks.length}</span>
         </div>
 
         <div className="task-content">
-          {/* Если есть картинки, выводим их списком */}
           {images.length > 0 && (
             <div className="task-images-container">
-              {images.map((url, index) => (
-                <img
-                  key={index}
-                  src={url}
-                  alt={`Задача ${index + 1}`}
-                  className="task-image"
-                />
-              ))}
+              {images.map((url, i) => <img key={i} src={url} alt="Задание" className="task-image" />)}
             </div>
           )}
-
           <p className="task-text">{currentTask.question}</p>
         </div>
 
-        <input
-          type="text"
-          className="answer-input"
-          placeholder="Твой ответ..."
-          value={answerInput}
-          onChange={(e) => setAnswerInput(e.target.value)}
-        />
-
-        <button
-          className="primary-btn submit-btn"
-          onClick={handleNextTask}
-          disabled={!answerInput.trim()}
-        >
-          {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
-        </button>
+        {/* Поле ввода теперь сразу под вопросом! */}
+        <div className="answer-section">
+          <input
+            type="text"
+            className="answer-input"
+            placeholder="Введи ответ (А, Б, В... или число)"
+            value={answerInput}
+            onChange={(e) => setAnswerInput(e.target.value)}
+          />
+          <button
+            className="primary-btn submit-btn"
+            onClick={handleNextTask}
+            disabled={!answerInput.trim()}
+          >
+            {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -252,24 +241,29 @@ function App() {
     return (
       <div className="screen-container">
         <h2 className="title">🎉 Тест завершен!</h2>
-        <div className="profile-card-real" style={{textAlign: 'center'}}>
+        <div className="profile-card-real" style={{textAlign: 'center', marginBottom: '20px'}}>
           <p style={{fontSize: '1.2rem'}}>Твой результат:</p>
           <h1 style={{color: '#3aa1e9', margin: '10px 0'}}>{correctCount} / {tasks.length}</h1>
-          <p>Баллы уже сохранены в твой профиль.</p>
+        </div>
+
+        {/* Блок с обратной связью от ИИ */}
+        <div className="ai-feedback-box">
+          {isAiLoading ? (
+            <div className="ai-loading">🤖 Нейросеть проверяет ответы...</div>
+          ) : aiFeedback ? (
+            <div className="ai-text" dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
+          ) : (
+            <div className="ai-text">Ошибок нет! Идеальная работа. 🏆</div>
+          )}
         </div>
 
         <button
           className="primary-btn"
           onClick={() => {
-            // Перезагружаем профиль, чтобы обновить баллы
             setLoading(true);
             fetch(`${API_URL}/get_user_data?user_id=${userId}`)
               .then(res => res.json())
-              .then(data => {
-                setUserData(data);
-                setCurrentScreen('main');
-                setLoading(false);
-              });
+              .then(data => { setUserData(data); setCurrentScreen('main'); setLoading(false); });
           }}
           style={{marginTop: '20px'}}
         >
