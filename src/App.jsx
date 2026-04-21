@@ -334,7 +334,7 @@ function App() {
           <p className="tasks-solved">Решено задач: <b>{userData?.solved_tasks || 0}</b></p>
 
           <button className="modern-btn lang-btn" onClick={handleSwitchLanguage}>
-            {isRu ? '🇰🇬 Переключить на Кыргызча' : '🇷🇺 Переключить на Русский'}
+            {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
           </button>
 
           <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
