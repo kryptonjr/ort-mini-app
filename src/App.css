@@ -298,3 +298,88 @@
   color: #e74c3c;
   border: 1px solid #ffeaea;
 }
+/* =========================================
+   ЭКРАН ТРЕНИРОВКИ (ВЫБОР ПРЕДМЕТОВ)
+   ========================================= */
+
+.subjects-grid-modern {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.subject-card-modern {
+  border-radius: 20px;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 140px;
+}
+
+.subject-card-modern:active {
+  transform: scale(0.95);
+}
+
+/* Эффект матового стекла (Glassmorphism) для иконки */
+.subject-icon-glass {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.subject-name-modern {
+  font-weight: 700;
+  color: #222;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+/* Градиенты карточек как на макете */
+.subj-blue {
+  background: linear-gradient(135deg, #8cb5f3 0%, #aed2f9 100%);
+  box-shadow: 0 8px 16px rgba(140, 181, 243, 0.35);
+}
+.subj-green {
+  background: linear-gradient(135deg, #9ae29d 0%, #c5f1c7 100%);
+  box-shadow: 0 8px 16px rgba(154, 226, 157, 0.35);
+}
+.subj-purple {
+  background: linear-gradient(135deg, #b8a6f6 0%, #dcd3fc 100%);
+  box-shadow: 0 8px 16px rgba(184, 166, 246, 0.35);
+}
+.subj-orange {
+  background: linear-gradient(135deg, #f7ba6d 0%, #fed8a6 100%);
+  box-shadow: 0 8px 16px rgba(247, 186, 109, 0.35);
+}
+.subj-teal {
+  background: linear-gradient(135deg, #6fdcd0 0%, #a3ede4 100%);
+  box-shadow: 0 8px 16px rgba(111, 220, 208, 0.35);
+}
+.subj-red {
+  background: linear-gradient(135deg, #f38b8b 0%, #fcbaba 100%);
+  box-shadow: 0 8px 16px rgba(243, 139, 139, 0.35);
+}
+
+/* Кнопка возврата с красной рамкой */
+.back-btn-outline {
+  background: white;
+  color: #111;
+  border: 2px solid #a44040; /* Темно-красная рамка */
+  box-shadow: none;
+}

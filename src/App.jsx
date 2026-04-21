@@ -349,17 +349,44 @@ function App() {
 
   // ЭКРАН 5: ТРЕНИРОВКА (ВЫБОР ПРЕДМЕТА)
   if (currentScreen === 'training') {
+    // Массив предметов с иконками и CSS-классами цветов
+    const subjectsList = [
+      { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
+      { name: 'Геометрия', icon: '📐', colorClass: 'subj-green' },
+      { name: 'Аналогии', icon: '🔗', colorClass: 'subj-purple' },
+      { name: 'Дополнение предложений', icon: '📝', colorClass: 'subj-orange' },
+      { name: 'Чтение и понимание', icon: '📖', colorClass: 'subj-teal' },
+      { name: 'Грамматика', icon: '🅰️', colorClass: 'subj-red' }
+    ];
+
     return (
-      <div className="screen-container">
-        <h2 className="title">📚 Предметы</h2>
-        <div className="subjects-grid">
-          {['Алгебра', 'Геометрия', 'Аналогии', 'Дополнение предложений', 'Чтение и понимание', 'Грамматика'].map(subject => (
-            <button key={subject} className="subject-card" onClick={() => handleSubjectClick(subject)}>
-              <span className="subject-name">{subject}</span>
-            </button>
+      <div className="app-container modern-ui">
+        {/* Шапка */}
+        <div className="modern-header" style={{ marginBottom: '30px' }}>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            📚 Предметы
+          </h2>
+        </div>
+
+        {/* Сетка предметов */}
+        <div className="subjects-grid-modern">
+          {subjectsList.map(subj => (
+            <div
+              key={subj.name}
+              className={`subject-card-modern ${subj.colorClass}`}
+              onClick={() => handleSubjectClick(subj.name)}
+            >
+              <div className="subject-icon-glass">{subj.icon}</div>
+              <span className="subject-name-modern">{subj.name}</span>
+            </div>
           ))}
         </div>
-        <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+
+        {/* Кнопка Назад */}
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
+          ⬅ Назад
+        </button>
       </div>
     );
   }
