@@ -27,3 +27,24 @@
 }
 .answer-input:focus { border-color: #3aa1e9; }
 .submit-btn { width: 100%; margin-top: auto; }
+
+.task-images-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.task-image {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.task-text {
+  margin-top: 10px;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Чтобы сохранялись переносы строк из БД */
+}

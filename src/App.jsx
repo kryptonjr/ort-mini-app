@@ -43,14 +43,23 @@ function App() {
     setCurrentScreen('amount_select');
   };
 
-  // --- 2. Скачиваем задачи с сервера ---
+
+  // --- 2. Скачиваем задачи с сервера (Исправленная версия) ---
   const handleStartTest = (amount) => {
     setLoading(true);
-    fetch(`${API_URL}/get_tasks?user_id=${userId}&subject=${selectedSubject}&amount=${amount}`)
-      .then(res => res.json())
+
+    // Кодируем предмет (чтобы Алгебра не превратилась в кракозябры)
+    const encodedSubject = encodeURIComponent(selectedSubject);
+    const url = `${API_URL}/get_tasks?user_id=${userId}&subject=${encodedSubject}&amount=${amount}`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        if (data.length === 0) {
-          alert("Ты решил все задачи по этому предмету!");
+        if (!Array.isArray(data) || data.length === 0) {
+          alert("Задач по этому предмету пока нет или ты всё решил!");
           setLoading(false);
           setCurrentScreen('training');
           return;
@@ -61,6 +70,12 @@ function App() {
         setSolvedIds([]);
         setCurrentScreen('solving');
         setLoading(false);
+      })
+      .catch(err => {
+        console.error("Критическая ошибка загрузки:", err);
+        alert("Не удалось загрузить задачи. Проверь консоль сервера.");
+        setLoading(false); // Выключаем загрузку, чтобы экран не висел
+        setCurrentScreen('training');
       });
   };
 
@@ -178,9 +193,16 @@ function App() {
     );
   }
 
+
   // === ЭКРАН: САМ ТЕСТ ===
   if (currentScreen === 'solving') {
     const currentTask = tasks[currentTaskIdx];
+
+    // Подготовка списка картинок (разбиваем строку по пробелам или запятым)
+    const images = currentTask.image_url
+      ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "")
+      : [];
+
     return (
       <div className="screen-container solving-screen">
         <div className="task-header">
@@ -189,7 +211,21 @@ function App() {
         </div>
 
         <div className="task-content">
-          <p>{currentTask.question}</p>
+          {/* Если есть картинки, выводим их списком */}
+          {images.length > 0 && (
+            <div className="task-images-container">
+              {images.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt={`Задача ${index + 1}`}
+                  className="task-image"
+                />
+              ))}
+            </div>
+          )}
+
+          <p className="task-text">{currentTask.question}</p>
         </div>
 
         <input
