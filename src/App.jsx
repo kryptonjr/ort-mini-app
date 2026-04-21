@@ -171,7 +171,7 @@ function App() {
            <p>Имя: <b>{userData?.first_name}</b></p>
            <p>ID: <b>#{userData?.id}</b></p>
            <p>Статус: <span className="role-tag">{userData?.role}</span></p>
-           <p>Язык: <b>{isRu ? '🇷🇺 Русский' : '🇰🇬 Кыргызча'}</b></p>
+           <p>Язык: <b>{isRu ? '🇷🇺' : '🇰🇬'}</b></p>
 
            <div className="stats-grid">
               <div className="stat-item"><span>Алгебра</span><b>{userData?.scores?.algebra}</b></div>
