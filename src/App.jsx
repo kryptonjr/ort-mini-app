@@ -11,6 +11,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
 
+  // Состояния для темы (читаем стандартную тему Телеграма при запуске)
+  const [isDarkTheme, setIsDarkTheme] = useState(tg.colorScheme === 'dark');
+
   // === СОСТОЯНИЯ ТЕСТА И ТАЙМЕРА ===
   const [selectedSubject, setSelectedSubject] = useState('');
   const [tasks, setTasks] = useState([]);
@@ -21,7 +24,7 @@ function App() {
   const [userAnswers, setUserAnswers] = useState([]);
   const [aiFeedback, setAiFeedback] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0); // Время в секундах
+  const [timeLeft, setTimeLeft] = useState(0);
 
   // ID пользователя
   const userId = tg.initDataUnsafe?.user?.id || 1014543443;
@@ -41,7 +44,7 @@ function App() {
         console.error("Ошибка:", err);
         setLoading(false);
       });
-  }, []);
+  }, [userId]);
 
   // --- 2. ЛОГИКА ТАЙМЕРА ---
   useEffect(() => {
@@ -73,14 +76,13 @@ function App() {
           setCurrentScreen('training');
           return;
         }
-        // Сброс всех настроек перед новым тестом
         setTasks(data);
         setCurrentTaskIdx(0);
         setCorrectCount(0);
         setSolvedIds([]);
         setUserAnswers([]);
         setAiFeedback("");
-        setTimeLeft(amount * 60); // Даем по 1 минуте на каждую задачу
+        setTimeLeft(amount * 60);
 
         setCurrentScreen('solving');
         setLoading(false);
@@ -162,28 +164,34 @@ function App() {
     });
   };
 
-
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
-  if (loading) return <div className="loading">Загрузка данных...</div>;
+  // ЭКРАН 0: ЗАГРУЗКА
+  if (loading) {
+    return (
+      <div className={`app-container modern-ui loader-screen ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-logo" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>
+          🧬 O.R.T. AI
+        </div>
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   // ЭКРАН 1: ГЛАВНЫЙ
   if (currentScreen === 'main') {
-    // Считаем общую сумму баллов для профиля
     const totalScore = userData?.scores
       ? Object.values(userData.scores).reduce((a, b) => a + b, 0)
       : 0;
 
     return (
-      <div className="app-container modern-ui">
-        {/* Шапка */}
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header">
           <div className="modern-logo">🧬 O.R.T. AI</div>
           <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
           <p className="subtitle">Твой ИИ-помощник к ОРТ</p>
         </div>
 
-        {/* Главная кнопка тренировки */}
         <div className="main-action-card" onClick={() => setCurrentScreen('training')}>
           <div className="card-icon-large">📖</div>
           <div className="card-text">
@@ -192,7 +200,6 @@ function App() {
           </div>
         </div>
 
-        {/* Сетка из 3 кнопок */}
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
             <div className="dash-icon">👤</div>
@@ -220,11 +227,9 @@ function App() {
           </div>
         </div>
 
-        {/* Блок "Мои Баллы" */}
         <div className="scores-section">
           <h3 className="section-title">Мои Баллы</h3>
           <div className="scores-row">
-            {/* Математика (Алгебра + Геометрия) */}
             <div className="score-col">
               <div className="score-icon">🧮</div>
               <span className="score-label">Math</span>
@@ -232,7 +237,6 @@ function App() {
               <span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span>
             </div>
 
-            {/* Грамматика */}
             <div className="score-col">
               <div className="score-icon">📜</div>
               <span className="score-label">Grammar</span>
@@ -240,7 +244,6 @@ function App() {
               <span className="score-val">{userData?.scores?.grammar || 0} pts</span>
             </div>
 
-            {/* Чтение */}
             <div className="score-col">
               <div className="score-icon">👁️</div>
               <span className="score-label">Reading</span>
@@ -250,7 +253,6 @@ function App() {
           </div>
         </div>
 
-        {/* Нижние кнопки */}
         <button className="modern-btn vip-btn" onClick={() => alert('VIP-статус приобретается через поддержку!')}>
           🚀 VIP Разбор ИИ
         </button>
@@ -266,8 +268,7 @@ function App() {
     const isRu = userData?.language !== 'kg';
 
     return (
-      <div className="app-container modern-ui">
-        {/* Шапка профиля */}
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-profile-header">
           <div className="modern-logo" style={{ marginBottom: '15px' }}>🧬 O.R.T. AI</div>
           <div className="profile-title">
@@ -278,7 +279,6 @@ function App() {
           <p className="profile-meta">#ID: {userData?.id} | {userData?.role}</p>
         </div>
 
-        {/* Сетка баллов */}
         <div className="profile-stats-grid">
           <div className="stat-card-modern subj-blue">
             <div className="stat-icon-glass">🧮</div>
@@ -329,11 +329,14 @@ function App() {
           </div>
         </div>
 
-        {/* Подвал профиля */}
         <div className="profile-footer">
           <p className="tasks-solved">Решено задач: <b>{userData?.solved_tasks || 0}</b></p>
 
-          <button className="modern-btn lang-btn" onClick={handleSwitchLanguage}>
+          <button className="modern-btn theme-btn" onClick={() => setIsDarkTheme(!isDarkTheme)}>
+            {isDarkTheme ? '☀️ Включить светлую тему' : '🌙 Включить темную тему'}
+          </button>
+
+          <button className="modern-btn lang-btn" onClick={handleSwitchLanguage} style={{marginBottom: '10px'}}>
             {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
           </button>
 
@@ -349,31 +352,30 @@ function App() {
   if (currentScreen === 'leaderboard') {
     const medals = ['🥇', '🥈', '🥉'];
     return (
-      <div className="screen-container">
-        <h2 className="title">🏆 ТОП-10 УЧЕНИКОВ</h2>
-        <div className="profile-card-real" style={{padding: '10px 20px'}}>
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🏆 ТОП-10 УЧЕНИКОВ</h2>
+        <div className="profile-card-real" style={{padding: '10px 20px', borderRadius: '16px'}}>
           {leaderboard.length === 0 ? (
             <p style={{textAlign: 'center'}}>Пока нет данных.</p>
           ) : (
             leaderboard.map((user, idx) => (
-              <div key={user.id} style={{display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee'}}>
+              <div key={user.id} style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0', borderBottom: '1px solid #eee'}}>
                 <span>
-                  {idx < 3 ? medals[idx] : `${idx + 1}. `}
-                  <b>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
+                  {idx < 3 ? medals[idx] : <span style={{opacity: 0.5}}>{idx + 1}.</span>}
+                  <b style={{marginLeft: '10px'}}>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
                 </span>
                 <span style={{color: '#3aa1e9', fontWeight: 'bold'}}>{user.total_score} б.</span>
               </div>
             ))
           )}
         </div>
-        <button className="back-button" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+        <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
 
-  // === ЭКРАН: ПОМОЩЬ (MODERN UI) ===
+  // ЭКРАН 4: ПОМОЩЬ
   if (currentScreen === 'help') {
-    // Список пунктов инструкции с иконками и цветами
     const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
       { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
@@ -382,8 +384,7 @@ function App() {
     ];
 
     return (
-      <div className="app-container modern-ui help-modern">
-        {/* Шапка */}
+      <div className={`app-container modern-ui help-modern ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
           <div className="modern-logo">🧬 O.R.T. AI</div>
           <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
@@ -391,7 +392,6 @@ function App() {
           </h2>
         </div>
 
-        {/* Сетка инструкции (4 карточки) */}
         <div className="modern-dashboard-grid help-cards-grid">
           {helpInstructions.map((item, idx) => (
             <div key={idx} className={`stat-card-modern ${item.colorClass}`}>
@@ -404,7 +404,6 @@ function App() {
           ))}
         </div>
 
-        {/* Блок Связи (Dashboard-стиль) */}
         <div className="modern-dashboard-grid" style={{ marginBottom: '20px' }}>
            <div className="stat-card-modern vip-support-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '15px' }}>
               <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div>
@@ -412,14 +411,12 @@ function App() {
                 <span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span>
                 <span className="stat-score help-subtitle">Связаться с нами</span>
               </div>
-              {/* Ссылка */}
               <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
-                <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto' }}>@Altin_Supprot_bot</button>
+                <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto', marginBottom: 0 }}>@Support</button>
               </a>
            </div>
         </div>
 
-        {/* Кнопка Назад */}
         <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
           ⬅ Назад
         </button>
@@ -429,7 +426,6 @@ function App() {
 
   // ЭКРАН 5: ТРЕНИРОВКА (ВЫБОР ПРЕДМЕТА)
   if (currentScreen === 'training') {
-    // Массив предметов с иконками и CSS-классами цветов
     const subjectsList = [
       { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
       { name: 'Геометрия', icon: '📐', colorClass: 'subj-green' },
@@ -440,8 +436,7 @@ function App() {
     ];
 
     return (
-      <div className="app-container modern-ui">
-        {/* Шапка */}
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
           <div className="modern-logo">🧬 O.R.T. AI</div>
           <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
@@ -449,7 +444,6 @@ function App() {
           </h2>
         </div>
 
-        {/* Сетка предметов */}
         <div className="subjects-grid-modern">
           {subjectsList.map(subj => (
             <div
@@ -463,7 +457,6 @@ function App() {
           ))}
         </div>
 
-        {/* Кнопка Назад */}
         <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
           ⬅ Назад
         </button>
@@ -474,14 +467,14 @@ function App() {
   // ЭКРАН 6: ВЫБОР КОЛИЧЕСТВА ЗАДАЧ
   if (currentScreen === 'amount_select') {
     return (
-      <div className="screen-container">
-        <h2 className="title">{selectedSubject}</h2>
-        <p style={{marginBottom: '20px'}}>Сколько задач хочешь решить?</p>
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{textAlign: 'center'}}>
+        <h2 className="title" style={{marginBottom: '10px'}}>{selectedSubject}</h2>
+        <p className="subtitle" style={{marginBottom: '30px'}}>Сколько задач хочешь решить?</p>
         <div className="buttons-column">
-          <button className="primary-btn" onClick={() => handleStartTest(5)}>5 задач</button>
-          <button className="primary-btn" onClick={() => handleStartTest(10)}>10 задач</button>
-          <button className="primary-btn" onClick={() => handleStartTest(15)}>15 задач</button>
-          <button className="back-button" onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
+          <button className="modern-btn vip-btn" onClick={() => handleStartTest(5)}>5 задач</button>
+          <button className="modern-btn vip-btn" onClick={() => handleStartTest(10)}>10 задач</button>
+          <button className="modern-btn vip-btn" onClick={() => handleStartTest(15)}>15 задач</button>
+          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
         </div>
       </div>
     );
@@ -492,27 +485,26 @@ function App() {
     const currentTask = tasks[currentTaskIdx];
     const images = currentTask.image_url ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
 
-    // Форматируем время таймера для вывода (мм:сс)
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
     const timeString = `${m}:${s < 10 ? '0' : ''}${s}`;
 
     return (
-      <div className="screen-container">
-        <div className="task-header" style={{display: 'flex', justifyContent: 'space-between', width: '100%'}}>
-          <span>{selectedSubject} ({currentTaskIdx + 1}/{tasks.length})</span>
-          <span style={{ fontWeight: 'bold', color: timeLeft < 60 ? '#e74c3c' : '#333' }}>
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="task-header" style={{display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '15px'}}>
+          <span style={{fontWeight: 'bold', color: '#888'}}>{selectedSubject} ({currentTaskIdx + 1}/{tasks.length})</span>
+          <span style={{ fontWeight: 'bold', color: timeLeft < 60 ? '#e74c3c' : (isDarkTheme ? '#fff' : '#333') }}>
             ⏱ {timeString}
           </span>
         </div>
 
-        <div className="task-content">
+        <div className="task-content" style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'}}>
           {images.length > 0 && (
-            <div className="task-images-container">
-              {images.map((url, i) => <img key={i} src={url} alt="Задание" className="task-image" />)}
+            <div className="task-images-container" style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px'}}>
+              {images.map((url, i) => <img key={i} src={url} alt="Задание" className="task-image" style={{width: '100%', borderRadius: '8px'}} />)}
             </div>
           )}
-          <p className="task-text">{currentTask.question}</p>
+          <p className="task-text" style={{lineHeight: '1.5', whiteSpace: 'pre-wrap', margin: 0}}>{currentTask.question}</p>
         </div>
 
         <div className="answer-section">
@@ -522,11 +514,13 @@ function App() {
             placeholder="Введи ответ (А, Б, В... или число)"
             value={answerInput}
             onChange={(e) => setAnswerInput(e.target.value)}
+            style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}
           />
           <button
-            className="primary-btn submit-btn"
+            className="modern-btn lang-btn"
             onClick={handleNextTask}
             disabled={!answerInput.trim()}
+            style={{opacity: answerInput.trim() ? 1 : 0.5}}
           >
             {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
           </button>
@@ -538,32 +532,33 @@ function App() {
   // ЭКРАН 8: РЕЗУЛЬТАТ И ИИ-РАЗБОР
   if (currentScreen === 'result') {
     return (
-      <div className="screen-container">
-        <h2 className="title">🎉 Тест завершен!</h2>
-        <div className="profile-card-real" style={{textAlign: 'center', marginBottom: '20px'}}>
-          <p style={{fontSize: '1.2rem'}}>Твой результат:</p>
-          <h1 style={{color: '#3aa1e9', margin: '10px 0'}}>{correctCount} / {tasks.length}</h1>
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🎉 Тест завершен!</h2>
+
+        <div className="stat-card-modern subj-blue" style={{flexDirection: 'column', padding: '30px', marginBottom: '20px'}}>
+          <p style={{fontSize: '1.2rem', margin: '0 0 10px 0', opacity: 0.9}}>Твой результат:</p>
+          <h1 style={{fontSize: '3rem', margin: 0, color: '#111'}}>{correctCount} / {tasks.length}</h1>
         </div>
 
-        <div className="ai-feedback-box">
+        <div className="ai-feedback-box" style={{background: isDarkTheme ? '#1e1e1e' : '#f8f9fa', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #3aa1e9'}}>
           {isAiLoading ? (
-            <div className="ai-loading">🤖 Нейросеть проверяет ответы...</div>
+            <div className="ai-loading" style={{color: '#888', fontStyle: 'italic'}}>🤖 Нейросеть проверяет ответы...</div>
           ) : aiFeedback ? (
-            <div className="ai-text" dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
+            <div className="ai-text" style={{lineHeight: '1.5'}} dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
           ) : (
             <div className="ai-text">Ошибок нет! Идеальная работа. 🏆</div>
           )}
         </div>
 
         <button
-          className="primary-btn"
+          className="modern-btn lang-btn"
           onClick={() => {
             setLoading(true);
             fetch(`${API_URL}/get_user_data?user_id=${userId}`)
               .then(res => res.json())
               .then(data => { setUserData(data); setCurrentScreen('main'); setLoading(false); });
           }}
-          style={{marginTop: '20px'}}
+          style={{marginTop: '30px'}}
         >
           Вернуться на главную
         </button>
