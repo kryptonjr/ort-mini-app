@@ -87,3 +87,27 @@
   line-height: 1.5;
   color: #333;
 }
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Две одинаковые колонки */
+  gap: 10px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f4f6f8;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.stat-item b {
+  font-size: 1.2rem;
+  color: #3aa1e9;
+  margin-top: 4px;
+}

@@ -152,6 +152,10 @@ function App() {
            <div className="stats-grid">
               <div className="stat-item"><span>Алгебра</span><b>{userData?.scores?.algebra}</b></div>
               <div className="stat-item"><span>Геометрия</span><b>{userData?.scores?.geometry}</b></div>
+              <div className="stat-item"><span>Аналогии</span><b>{userData?.scores?.analogies}</b></div>
+              <div className="stat-item"><span>Доп. предлож.</span><b>{userData?.scores?.sentences}</b></div>
+              <div className="stat-item"><span>Чтение</span><b>{userData?.scores?.reading}</b></div>
+              <div className="stat-item"><span>Грамматика</span><b>{userData?.scores?.grammar}</b></div>
            </div>
            <p style={{marginTop: '15px'}}>Решено задач: {userData?.solved_tasks}</p>
         </div>
@@ -166,7 +170,7 @@ function App() {
       <div className="screen-container">
         <h2 className="title">📚 Предметы</h2>
         <div className="subjects-grid">
-          {['Алгебра', 'Геометрия'].map(subject => (
+          {['Алгебра', 'Геометрия', 'Аналогии', 'Дополнение предложений', 'Чтение и понимание', 'Грамматика'].map(subject => (
             <button key={subject} className="subject-card" onClick={() => handleSubjectClick(subject)}>
               <span className="subject-name">{subject}</span>
             </button>
