@@ -1,19 +1,4 @@
-import { useState, useEffect } from 'react';
-import './App.css';
 
-const tg = window.Telegram.WebApp;
-const API_URL = "https://ort-bot.ru";
-
-function App() {
-  // === ОСНОВНЫЕ СОСТОЯНИЯ ===
-  const [currentScreen, setCurrentScreen] = useState('main');
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [leaderboard, setLeaderboard] = useState([]);
-
-  // Опции
-  const [useTimer, setUseTimer] = useState(true);
-  const [showPaymentModal, setShowPaymentModal] = useState(false); // Оставили только один стейт!
 
   // === ТЕМА И ЦВЕТА ===
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
