@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
-
 const tg = window.Telegram.WebApp;
-const API_URL = "https://ort-bot.ru:8082";
+const API_URL = "https://ort-bot.ru";
 
 function App() {
   // === ОСНОВНЫЕ СОСТОЯНИЯ ===
@@ -236,7 +235,6 @@ function App() {
               </p>
 
               <div className="qr-container">
-                {/* Вставляем прямую ссылку из интернета */}
                 <img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR MBank" className="qr-image" />
               </div>
 
@@ -356,7 +354,8 @@ function App() {
     );
   }
 
-  const helpInstructions = [
+  if (currentScreen === 'help') {
+    const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
       { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
       { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
