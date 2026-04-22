@@ -60,10 +60,29 @@ body {
   height: 100vh;
 }
 
+/* Исправляем основной заголовок */
 .title {
   font-size: 1.5rem;
   margin-bottom: 20px;
   text-align: center;
+  color: #111; /* Явно задаем черный цвет для светлой темы */
+  font-weight: 800;
+}
+
+/* Исправляем текст внутри синей карточки результата */
+.subj-blue h1 {
+  color: #111 !important;
+}
+
+.subj-blue p {
+  color: #222 !important;
+}
+
+/* Проверка ИИ (текст ожидания) */
+.ai-loading {
+  color: #555 !important;
+  font-weight: 500;
+}
 }
 
 /* =========================================
