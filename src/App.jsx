@@ -356,12 +356,11 @@ function App() {
     );
   }
 
-  if (currentScreen === 'help') {
-    const helpInstructions = [
+  const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
       { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
       { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
-      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' }
+      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' },
       { name: 'Тема', icon: '🌗', text: 'Переключай светлую и темную тему в Профиле.', colorClass: 'subj-teal' },
       { name: 'Топ-10', icon: '🏆', text: 'Решай задачи и поднимайся в таблице лидеров.', colorClass: 'subj-red' }
     ];
