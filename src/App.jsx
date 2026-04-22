@@ -11,8 +11,32 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
 
-  // Состояния для темы (читаем стандартную тему Телеграма при запуске)
-  const [isDarkTheme, setIsDarkTheme] = useState(tg.colorScheme === 'dark');
+  // === МАГИЯ ТЕМЫ: Читаем память или системную тему ===
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('app_theme');
+    if (savedTheme !== null) {
+      return savedTheme === 'dark';
+    }
+    // Если в памяти пусто, берем тему самого Телеграма!
+    return tg.colorScheme === 'dark';
+  });
+
+  // Синхронизируем цвета ВСЕГО телефона при переключении темы
+  useEffect(() => {
+    // Сохраняем выбор навсегда
+    localStorage.setItem('app_theme', isDarkTheme ? 'dark' : 'light');
+
+    // Красим основной фон браузера (УБИРАЕТ БЕЛЫЕ ПОЛОСЫ)
+    document.body.style.backgroundColor = isDarkTheme ? '#121212' : '#f4f7fb';
+
+    // Даем команду Телеграму перекрасить верхнюю шапку
+    try {
+      tg.setHeaderColor(isDarkTheme ? '#121212' : '#f4f7fb');
+      tg.setBackgroundColor(isDarkTheme ? '#121212' : '#f4f7fb');
+    } catch (e) {
+      console.log("Telegram API Theme Error:", e);
+    }
+  }, [isDarkTheme]);
 
   // === СОСТОЯНИЯ ТЕСТА И ТАЙМЕРА ===
   const [selectedSubject, setSelectedSubject] = useState('');
