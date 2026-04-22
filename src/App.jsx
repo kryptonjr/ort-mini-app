@@ -42,8 +42,13 @@ function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // === ИСПРАВЛЕНИЕ ТУТ: Убрали жестко зашитый ID админа ===
-  const userId = tg.initDataUnsafe?.user?.id;
+  // === БРОНЕБОЙНОЕ ИСПРАВЛЕНИЕ ID ===
+  // 1. Пытаемся получить ID из ссылки (наш запасной план из Python)
+  const urlParams = new URLSearchParams(window.location.search);
+  const fallbackId = urlParams.get('user_id');
+
+  // 2. Берем ID либо от Телеграма, либо из нашей ссылки
+  const userId = tg.initDataUnsafe?.user?.id || fallbackId;
 
   useEffect(() => {
     tg.ready();
