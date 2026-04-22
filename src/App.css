@@ -548,26 +548,18 @@
   margin: 0;
 }
 /* =========================================
-   ТЕМНАЯ ТЕМА (DARK MODE) - ИСПРАВЛЕННАЯ
+   ТЕМНАЯ ТЕМА (DARK MODE) - ИСПРАВЛЕННАЯ (С УЛУЧШЕННЫМ КОНТРАСТОМ)
    ========================================= */
 .dark-theme.modern-ui {
   background: #121212 !important; /* Глубокий черный фон для всего приложения */
+  color: #ffffff !important; /* Белый цвет текста по умолчанию для всего приложения в темной теме */
 }
 
-/* Перекрашиваем тексты в белый */
-.dark-theme .modern-logo,
-.dark-theme .modern-header h2,
-.dark-theme .profile-greeting,
-.dark-theme .stat-score,
-.dark-theme .help-title-modern,
-.dark-theme .subject-name-modern,
-.dark-theme .section-title,
-.dark-theme .task-text,
-.dark-theme .title {
-  color: #ffffff !important;
-}
+/* ПРИМЕЧАНИЕ: Я УДАЛИЛ длинный список селекторов для перекрашивания текстов в белый,
+   так как теперь это цвет по умолчанию. Это делает CSS чище и надежнее.
+*/
 
-/* Второстепенные тексты в светло-серый */
+/* Второстепенные тексты в светло-серый (переопределяет белый) */
 .dark-theme .profile-meta,
 .dark-theme .help-subtitle,
 .dark-theme .tasks-solved,
@@ -576,18 +568,13 @@
   color: #aaaaaa !important;
 }
 
-/* СЕКРЕТ ЗДЕСЬ:
-  Мы убрали filter: brightness(), поэтому цветные карточки (Алгебра, Геометрия и т.д.)
-  и стеклянные иконки остаются на 100% такими же яркими!
-  Мы только делаем их тень темнее, чтобы она сливалась с черным фоном.
-*/
+/* Остальные правила темной темы остаются без изменений, так как они работают верно */
 .dark-theme .stat-card-modern,
 .dark-theme .subject-card-modern,
 .dark-theme .main-action-card {
   box-shadow: 0 4px 15px rgba(0,0,0,0.8) !important;
 }
 
-/* А вот бывшие БЕЛЫЕ карточки (задачи, лидеры, баллы) делаем темно-серыми */
 .dark-theme .vip-support-btn,
 .dark-theme .task-content,
 .dark-theme .answer-section,
@@ -604,7 +591,6 @@
   border: 1px solid #555 !important;
 }
 
-/* Кнопка переключения темы */
 .dark-theme .theme-btn {
   background: #2a2a2a;
   color: #fff;
