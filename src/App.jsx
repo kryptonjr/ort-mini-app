@@ -185,15 +185,23 @@ function App() {
     );
   }
 
-  // === НОВЫЙ ЭКРАН: ЗАЩИТА ОТ НЕСАНКЦИОНИРОВАННОГО ДОСТУПА ===
+  // === ЭКРАН ОТЛАДКИ (DEBUG) ===
   if (!userId) {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center'}}>
         <div style={{fontSize: '4rem', marginBottom: '10px'}}>🔒</div>
         <h2 className="title" style={{marginBottom: '10px', color: isDarkTheme ? '#fff' : '#111'}}>Доступ закрыт</h2>
         <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>
-          Пожалуйста, откройте это приложение напрямую из чата с ботом.<br/><br/>Если проблема не исчезает, отправьте боту команду <b>/start</b>
+          Телеграм не передал твой ID.
         </p>
+
+        {/* Техническая информация для нас с тобой */}
+        <div style={{marginTop: '20px', padding: '15px', background: '#111', color: '#0f0', borderRadius: '12px', fontSize: '0.85rem', width: '100%', wordBreak: 'break-all', textAlign: 'left', border: '1px solid #333'}}>
+          <b>⚙️ DEBUG INFO:</b><br/><br/>
+          <b>initDataUnsafe:</b> {JSON.stringify(tg.initDataUnsafe)}<br/><br/>
+          <b>version:</b> {tg.version || 'Не определена'}<br/>
+          <b>platform:</b> {tg.platform || 'Не определена'}
+        </div>
       </div>
     );
   }
