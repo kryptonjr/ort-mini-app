@@ -5,31 +5,24 @@ const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
 
 function App() {
-  // === СОСТОЯНИЯ ПРИЛОЖЕНИЯ ===
   const [currentScreen, setCurrentScreen] = useState('main');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
 
-  // === МАГИЯ ТЕМЫ: Читаем память или системную тему ===
+  const [useTimer, setUseTimer] = useState(true);
+
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     const savedTheme = localStorage.getItem('app_theme');
     if (savedTheme !== null) {
       return savedTheme === 'dark';
     }
-    // Если в памяти пусто, берем тему самого Телеграма!
     return tg.colorScheme === 'dark';
   });
 
-  // Синхронизируем цвета ВСЕГО телефона при переключении темы
   useEffect(() => {
-    // Сохраняем выбор навсегда
     localStorage.setItem('app_theme', isDarkTheme ? 'dark' : 'light');
-
-    // Красим основной фон браузера (УБИРАЕТ БЕЛЫЕ ПОЛОСЫ)
     document.body.style.backgroundColor = isDarkTheme ? '#121212' : '#f4f7fb';
-
-    // Даем команду Телеграму перекрасить верхнюю шапку
     try {
       tg.setHeaderColor(isDarkTheme ? '#121212' : '#f4f7fb');
       tg.setBackgroundColor(isDarkTheme ? '#121212' : '#f4f7fb');
@@ -38,7 +31,6 @@ function App() {
     }
   }, [isDarkTheme]);
 
-  // === СОСТОЯНИЯ ТЕСТА И ТАЙМЕРА ===
   const [selectedSubject, setSelectedSubject] = useState('');
   const [tasks, setTasks] = useState([]);
   const [currentTaskIdx, setCurrentTaskIdx] = useState(0);
@@ -50,38 +42,35 @@ function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // ID пользователя
-  const userId = tg.initDataUnsafe?.user?.id || 1014543443;
+  // === ИСПРАВЛЕНИЕ ТУТ: Убрали жестко зашитый ID админа ===
+  const userId = tg.initDataUnsafe?.user?.id;
 
-  // --- 1. ЗАГРУЗКА ПРОФИЛЯ ПРИ СТАРТЕ ---
   useEffect(() => {
     tg.ready();
     tg.expand();
 
-    fetch(`${API_URL}/get_user_data?user_id=${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        setUserData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Ошибка:", err);
-        setLoading(false);
-      });
+    // Запрашиваем данные ТОЛЬКО если Телеграм успешно передал ID пользователя
+    if (userId) {
+      fetch(`${API_URL}/get_user_data?user_id=${userId}`)
+        .then(res => res.json())
+        .then(data => { setUserData(data); setLoading(false); })
+        .catch(err => { console.error("Ошибка:", err); setLoading(false); });
+    } else {
+      // Если ID нет, просто выключаем загрузку, чтобы показать экран ошибки
+      setLoading(false);
+    }
   }, [userId]);
 
-  // --- 2. ЛОГИКА ТАЙМЕРА ---
   useEffect(() => {
-    if (currentScreen === 'solving' && timeLeft > 0) {
+    if (currentScreen === 'solving' && useTimer && timeLeft > 0) {
       const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearInterval(timerId);
-    } else if (currentScreen === 'solving' && timeLeft === 0) {
+    } else if (currentScreen === 'solving' && useTimer && timeLeft === 0) {
       alert("⏱ Время вышло! Тест завершен автоматически.");
       finishTest(correctCount, solvedIds, userAnswers);
     }
-  }, [currentScreen, timeLeft]);
+  }, [currentScreen, timeLeft, useTimer]);
 
-  // --- 3. ФУНКЦИИ КНОПОК И НАВИГАЦИИ ---
   const handleSubjectClick = (subject) => {
     setSelectedSubject(subject);
     setCurrentScreen('amount_select');
@@ -106,7 +95,8 @@ function App() {
         setSolvedIds([]);
         setUserAnswers([]);
         setAiFeedback("");
-        setTimeLeft(amount * 60);
+
+        setTimeLeft(useTimer ? amount * 60 : -1);
 
         setCurrentScreen('solving');
         setLoading(false);
@@ -130,15 +120,13 @@ function App() {
       isCorrect: isCorrect
     }];
     setUserAnswers(newAnswers);
-
-    const newSolvedIds = [...solvedIds, currentTask.id];
-    setSolvedIds(newSolvedIds);
+    setSolvedIds([...solvedIds, currentTask.id]);
     setAnswerInput('');
 
     if (currentTaskIdx + 1 < tasks.length) {
       setCurrentTaskIdx(prev => prev + 1);
     } else {
-      finishTest(isCorrect ? correctCount + 1 : correctCount, newSolvedIds, newAnswers);
+      finishTest(isCorrect ? correctCount + 1 : correctCount, [...solvedIds, currentTask.id], newAnswers);
     }
   };
 
@@ -182,32 +170,36 @@ function App() {
     })
     .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
     .then(res => res.json())
-    .then(data => {
-      setUserData(data);
-      setLoading(false);
-    });
+    .then(data => { setUserData(data); setLoading(false); });
   };
+
 
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
-  // ЭКРАН 0: ЗАГРУЗКА
   if (loading) {
     return (
       <div className={`app-container modern-ui loader-screen ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <div className="modern-logo" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>
-          🧬 O.R.T. AI
-        </div>
+        <div className="modern-logo" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>🧬 O.R.T. AI</div>
         <div className="spinner"></div>
       </div>
     );
   }
 
-  // ЭКРАН 1: ГЛАВНЫЙ
-  if (currentScreen === 'main') {
-    const totalScore = userData?.scores
-      ? Object.values(userData.scores).reduce((a, b) => a + b, 0)
-      : 0;
+  // === НОВЫЙ ЭКРАН: ЗАЩИТА ОТ НЕСАНКЦИОНИРОВАННОГО ДОСТУПА ===
+  if (!userId) {
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center'}}>
+        <div style={{fontSize: '4rem', marginBottom: '10px'}}>🔒</div>
+        <h2 className="title" style={{marginBottom: '10px', color: isDarkTheme ? '#fff' : '#111'}}>Доступ закрыт</h2>
+        <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>
+          Пожалуйста, откройте это приложение напрямую из чата с ботом.<br/><br/>Если проблема не исчезает, отправьте боту команду <b>/start</b>
+        </p>
+      </div>
+    );
+  }
 
+  if (currentScreen === 'main') {
+    const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header">
@@ -215,7 +207,6 @@ function App() {
           <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
           <p className="subtitle">Твой ИИ-помощник к ОРТ</p>
         </div>
-
         <div className="main-action-card" onClick={() => setCurrentScreen('training')}>
           <div className="card-icon-large">📖</div>
           <div className="card-text">
@@ -223,156 +214,76 @@ function App() {
             <p>Начать подготовку</p>
           </div>
         </div>
-
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
-            <div className="dash-icon">👤</div>
-            <h4>Профиль</h4>
-            <p>{totalScore} баллов</p>
+            <div className="dash-icon">👤</div><h4>Профиль</h4><p>{totalScore} баллов</p>
           </div>
-
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
-            <div className="dash-icon">🆘</div>
-            <h4>Помощь</h4>
-            <p>Инструкции</p>
+            <div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p>
           </div>
-
           <div className="dash-card leader-card" onClick={() => {
             setLoading(true);
             fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => {
-              setLeaderboard(data);
-              setCurrentScreen('leaderboard');
-              setLoading(false);
+              setLeaderboard(data); setCurrentScreen('leaderboard'); setLoading(false);
             });
           }}>
-            <div className="dash-icon">🏆</div>
-            <h4>ТОП-10</h4>
-            <p>Лидеры</p>
+            <div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p>
           </div>
         </div>
-
         <div className="scores-section">
           <h3 className="section-title">Мои Баллы</h3>
           <div className="scores-row">
             <div className="score-col">
-              <div className="score-icon">🧮</div>
-              <span className="score-label">Math</span>
+              <div className="score-icon">🧮</div><span className="score-label">Math</span>
               <div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div>
               <span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span>
             </div>
-
             <div className="score-col">
-              <div className="score-icon">📜</div>
-              <span className="score-label">Grammar</span>
+              <div className="score-icon">📜</div><span className="score-label">Grammar</span>
               <div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div>
               <span className="score-val">{userData?.scores?.grammar || 0} pts</span>
             </div>
-
             <div className="score-col">
-              <div className="score-icon">👁️</div>
-              <span className="score-label">Reading</span>
+              <div className="score-icon">👁️</div><span className="score-label">Reading</span>
               <div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div>
               <span className="score-val">{userData?.scores?.reading || 0} pts</span>
             </div>
           </div>
         </div>
-
-        <button className="modern-btn vip-btn" onClick={() => alert('VIP-статус приобретается через поддержку!')}>
-          🚀 VIP Разбор ИИ
-        </button>
-        <button className="modern-btn exit-btn" onClick={() => tg.close()}>
-          🚪 Выход
-        </button>
+        <button className="modern-btn vip-btn" onClick={() => alert('VIP-статус приобретается через поддержку!')}>🚀 VIP Разбор ИИ</button>
+        <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
       </div>
     );
   }
 
-  // ЭКРАН 2: ПРОФИЛЬ
   if (currentScreen === 'profile') {
     const isRu = userData?.language !== 'kg';
-
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-profile-header">
           <div className="modern-logo" style={{ marginBottom: '15px' }}>🧬 O.R.T. AI</div>
-          <div className="profile-title">
-            <span className="profile-avatar">👨‍🎓</span>
-            <h2>Мой профиль</h2>
-          </div>
+          <div className="profile-title"><span className="profile-avatar">👨‍🎓</span><h2>Мой профиль</h2></div>
           <p className="profile-greeting">Привет, {userData?.first_name || 'Ученик'}!</p>
           <p className="profile-meta">#ID: {userData?.id} | {userData?.role}</p>
         </div>
-
         <div className="profile-stats-grid">
-          <div className="stat-card-modern subj-blue">
-            <div className="stat-icon-glass">🧮</div>
-            <div className="stat-text">
-              <span className="stat-label">Алгебра</span>
-              <span className="stat-score">{userData?.scores?.algebra || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="stat-card-modern subj-green">
-            <div className="stat-icon-glass">📐</div>
-            <div className="stat-text">
-              <span className="stat-label">Геометрия</span>
-              <span className="stat-score">{userData?.scores?.geometry || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="stat-card-modern subj-purple">
-            <div className="stat-icon-glass">🔗</div>
-            <div className="stat-text">
-              <span className="stat-label">Аналогии</span>
-              <span className="stat-score">{userData?.scores?.analogies || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="stat-card-modern subj-orange">
-            <div className="stat-icon-glass">📝</div>
-            <div className="stat-text">
-              <span className="stat-label">Доп. предлож.</span>
-              <span className="stat-score">{userData?.scores?.sentences || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="stat-card-modern subj-teal">
-            <div className="stat-icon-glass">📖</div>
-            <div className="stat-text">
-              <span className="stat-label">Чтение</span>
-              <span className="stat-score">{userData?.scores?.reading || 0} pts</span>
-            </div>
-          </div>
-
-          <div className="stat-card-modern subj-red">
-            <div className="stat-icon-glass">🅰️</div>
-            <div className="stat-text">
-              <span className="stat-label">Грамматика</span>
-              <span className="stat-score">{userData?.scores?.grammar || 0} pts</span>
-            </div>
-          </div>
+          <div className="stat-card-modern subj-blue"><div className="stat-icon-glass">🧮</div><div className="stat-text"><span className="stat-label">Алгебра</span><span className="stat-score">{userData?.scores?.algebra || 0} pts</span></div></div>
+          <div className="stat-card-modern subj-green"><div className="stat-icon-glass">📐</div><div className="stat-text"><span className="stat-label">Геометрия</span><span className="stat-score">{userData?.scores?.geometry || 0} pts</span></div></div>
+          <div className="stat-card-modern subj-purple"><div className="stat-icon-glass">🔗</div><div className="stat-text"><span className="stat-label">Аналогии</span><span className="stat-score">{userData?.scores?.analogies || 0} pts</span></div></div>
+          <div className="stat-card-modern subj-orange"><div className="stat-icon-glass">📝</div><div className="stat-text"><span className="stat-label">Доп. предлож.</span><span className="stat-score">{userData?.scores?.sentences || 0} pts</span></div></div>
+          <div className="stat-card-modern subj-teal"><div className="stat-icon-glass">📖</div><div className="stat-text"><span className="stat-label">Чтение</span><span className="stat-score">{userData?.scores?.reading || 0} pts</span></div></div>
+          <div className="stat-card-modern subj-red"><div className="stat-icon-glass">🅰️</div><div className="stat-text"><span className="stat-label">Грамматика</span><span className="stat-score">{userData?.scores?.grammar || 0} pts</span></div></div>
         </div>
-
         <div className="profile-footer">
           <p className="tasks-solved">Решено задач: <b>{userData?.solved_tasks || 0}</b></p>
-
-          <button className="modern-btn theme-btn" onClick={() => setIsDarkTheme(!isDarkTheme)}>
-            {isDarkTheme ? '☀️ Включить светлую тему' : '🌙 Включить темную тему'}
-          </button>
-
-          <button className="modern-btn lang-btn" onClick={handleSwitchLanguage} style={{marginBottom: '10px'}}>
-            {isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}
-          </button>
-
-          <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
-            ⬅ Назад
-          </button>
+          <button className="modern-btn theme-btn" onClick={() => setIsDarkTheme(!isDarkTheme)}>{isDarkTheme ? '☀️ Включить светлую тему' : '🌙 Включить темную тему'}</button>
+          <button className="modern-btn lang-btn" onClick={handleSwitchLanguage} style={{marginBottom: '10px'}}>{isRu ? 'Переключить на Кыргызча' : 'Переключить на Русский'}</button>
+          <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
         </div>
       </div>
     );
   }
 
-  // ЭКРАН 3: ТАБЛИЦА ЛИДЕРОВ
   if (currentScreen === 'leaderboard') {
     const medals = ['🥇', '🥈', '🥉'];
     return (
@@ -384,10 +295,7 @@ function App() {
           ) : (
             leaderboard.map((user, idx) => (
               <div key={user.id} style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0', borderBottom: '1px solid #eee'}}>
-                <span>
-                  {idx < 3 ? medals[idx] : <span style={{opacity: 0.5}}>{idx + 1}.</span>}
-                  <b style={{marginLeft: '10px'}}>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
-                </span>
+                <span>{idx < 3 ? medals[idx] : <span style={{opacity: 0.5}}>{idx + 1}.</span>}<b style={{marginLeft: '10px'}}>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b></span>
                 <span style={{color: '#3aa1e9', fontWeight: 'bold'}}>{user.total_score} б.</span>
               </div>
             ))
@@ -398,7 +306,6 @@ function App() {
     );
   }
 
-  // ЭКРАН 4: ПОМОЩЬ
   if (currentScreen === 'help') {
     const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
@@ -406,49 +313,28 @@ function App() {
       { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
       { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' }
     ];
-
     return (
       <div className={`app-container modern-ui help-modern ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
           <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            🆘 Помощь
-          </h2>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>🆘 Помощь</h2>
         </div>
-
         <div className="modern-dashboard-grid help-cards-grid">
           {helpInstructions.map((item, idx) => (
-            <div key={idx} className={`stat-card-modern ${item.colorClass}`}>
-              <div className="stat-icon-glass">{item.icon}</div>
-              <div className="stat-text">
-                <span className="stat-label help-title-modern">{item.name}</span>
-                <span className="stat-score help-subtitle">{item.text}</span>
-              </div>
-            </div>
+            <div key={idx} className={`stat-card-modern ${item.colorClass}`}><div className="stat-icon-glass">{item.icon}</div><div className="stat-text"><span className="stat-label help-title-modern">{item.name}</span><span className="stat-score help-subtitle">{item.text}</span></div></div>
           ))}
         </div>
-
         <div className="modern-dashboard-grid" style={{ marginBottom: '20px' }}>
            <div className="stat-card-modern vip-support-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '15px' }}>
-              <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div>
-              <div className="stat-text" style={{ textAlign: 'left' }}>
-                <span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span>
-                <span className="stat-score help-subtitle">Связаться с нами</span>
-              </div>
-              <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
-                <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto', marginBottom: 0 }}>@Support</button>
-              </a>
+              <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div><div className="stat-text" style={{ textAlign: 'left' }}><span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span><span className="stat-score help-subtitle">Связаться с нами</span></div>
+              <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}><button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto', marginBottom: 0 }}>@Support</button></a>
            </div>
         </div>
-
-        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
-          ⬅ Назад
-        </button>
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
 
-  // ЭКРАН 5: ТРЕНИРОВКА (ВЫБОР ПРЕДМЕТА)
   if (currentScreen === 'training') {
     const subjectsList = [
       { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
@@ -458,42 +344,31 @@ function App() {
       { name: 'Чтение и понимание', icon: '📖', colorClass: 'subj-teal' },
       { name: 'Грамматика', icon: '🅰️', colorClass: 'subj-red' }
     ];
-
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <div className="modern-header" style={{ marginBottom: '30px' }}>
-          <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            📚 Предметы
-          </h2>
-        </div>
-
+        <div className="modern-header" style={{ marginBottom: '30px' }}><div className="modern-logo">🧬 O.R.T. AI</div><h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📚 Предметы</h2></div>
         <div className="subjects-grid-modern">
           {subjectsList.map(subj => (
-            <div
-              key={subj.name}
-              className={`subject-card-modern ${subj.colorClass}`}
-              onClick={() => handleSubjectClick(subj.name)}
-            >
-              <div className="subject-icon-glass">{subj.icon}</div>
-              <span className="subject-name-modern">{subj.name}</span>
-            </div>
+            <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleSubjectClick(subj.name)}><div className="subject-icon-glass">{subj.icon}</div><span className="subject-name-modern">{subj.name}</span></div>
           ))}
         </div>
-
-        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>
-          ⬅ Назад
-        </button>
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
 
-  // ЭКРАН 6: ВЫБОР КОЛИЧЕСТВА ЗАДАЧ
   if (currentScreen === 'amount_select') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{textAlign: 'center'}}>
-        <h2 className="title" style={{marginBottom: '10px'}}>{selectedSubject}</h2>
-        <p className="subtitle" style={{marginBottom: '30px'}}>Сколько задач хочешь решить?</p>
+        <h2 className="title" style={{marginBottom: '15px'}}>{selectedSubject}</h2>
+        <div style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', marginBottom: '25px', border: `1px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
+           <p style={{marginBottom: '15px', fontWeight: 'bold', color: isDarkTheme ? '#fff' : '#111'}}>Режим прохождения:</p>
+           <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
+             <div onClick={() => setUseTimer(true)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: useTimer ? '#3aa1e9' : 'transparent', color: useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${useTimer ? '#3aa1e9' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>⏱ На время</div>
+             <div onClick={() => setUseTimer(false)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: !useTimer ? '#e74c3c' : 'transparent', color: !useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${!useTimer ? '#e74c3c' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>🧘 Без таймера</div>
+           </div>
+        </div>
+        <p className="subtitle" style={{marginBottom: '20px'}}>Сколько задач хочешь решить?</p>
         <div className="buttons-column">
           <button className="modern-btn vip-btn" onClick={() => handleStartTest(5)}>5 задач</button>
           <button className="modern-btn vip-btn" onClick={() => handleStartTest(10)}>10 задач</button>
@@ -504,11 +379,9 @@ function App() {
     );
   }
 
-  // ЭКРАН 7: САМ ТЕСТ (С ТАЙМЕРОМ)
   if (currentScreen === 'solving') {
     const currentTask = tasks[currentTaskIdx];
     const images = currentTask.image_url ? currentTask.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
-
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
     const timeString = `${m}:${s < 10 ? '0' : ''}${s}`;
@@ -517,11 +390,8 @@ function App() {
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="task-header" style={{display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '15px'}}>
           <span style={{fontWeight: 'bold', color: '#888'}}>{selectedSubject} ({currentTaskIdx + 1}/{tasks.length})</span>
-          <span style={{ fontWeight: 'bold', color: timeLeft < 60 ? '#e74c3c' : (isDarkTheme ? '#fff' : '#333') }}>
-            ⏱ {timeString}
-          </span>
+          <span style={{ fontWeight: 'bold', color: (useTimer && timeLeft < 60) ? '#e74c3c' : (isDarkTheme ? '#fff' : '#333') }}>{useTimer ? `⏱ ${timeString}` : '🧘 Без ограничений'}</span>
         </div>
-
         <div className="task-content" style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'}}>
           {images.length > 0 && (
             <div className="task-images-container" style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px'}}>
@@ -530,22 +400,9 @@ function App() {
           )}
           <p className="task-text" style={{lineHeight: '1.5', whiteSpace: 'pre-wrap', margin: 0}}>{currentTask.question}</p>
         </div>
-
         <div className="answer-section">
-          <input
-            type="text"
-            className="answer-input"
-            placeholder="Введи ответ (А, Б, В... или число)"
-            value={answerInput}
-            onChange={(e) => setAnswerInput(e.target.value)}
-            style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}
-          />
-          <button
-            className="modern-btn lang-btn"
-            onClick={handleNextTask}
-            disabled={!answerInput.trim()}
-            style={{opacity: answerInput.trim() ? 1 : 0.5}}
-          >
+          <input type="text" className="answer-input" placeholder="Введи ответ (А, Б, В... или число)" value={answerInput} onChange={(e) => setAnswerInput(e.target.value)} style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}/>
+          <button className="modern-btn lang-btn" onClick={handleNextTask} disabled={!answerInput.trim()} style={{opacity: answerInput.trim() ? 1 : 0.5}}>
             {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
           </button>
         </div>
@@ -553,39 +410,27 @@ function App() {
     );
   }
 
-  // ЭКРАН 8: РЕЗУЛЬТАТ И ИИ-РАЗБОР
   if (currentScreen === 'result') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🎉 Тест завершен!</h2>
-
         <div className="stat-card-modern subj-blue" style={{flexDirection: 'column', padding: '30px', marginBottom: '20px'}}>
           <p style={{fontSize: '1.2rem', margin: '0 0 10px 0', opacity: 0.9}}>Твой результат:</p>
           <h1 style={{fontSize: '3rem', margin: 0, color: '#111'}}>{correctCount} / {tasks.length}</h1>
         </div>
-
         <div className="ai-feedback-box" style={{background: isDarkTheme ? '#1e1e1e' : '#f8f9fa', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #3aa1e9'}}>
           {isAiLoading ? (
-            <div className="ai-loading" style={{color: '#888', fontStyle: 'italic'}}>🤖 Нейросеть проверяет ответы...</div>
+            <div className="ai-loading" style={{color: '#888', fontStyle: 'italic'}}>🤖 Проверка результатов...</div>
           ) : aiFeedback ? (
             <div className="ai-text" style={{lineHeight: '1.5'}} dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
           ) : (
             <div className="ai-text">Ошибок нет! Идеальная работа. 🏆</div>
           )}
         </div>
-
-        <button
-          className="modern-btn lang-btn"
-          onClick={() => {
+        <button className="modern-btn lang-btn" onClick={() => {
             setLoading(true);
-            fetch(`${API_URL}/get_user_data?user_id=${userId}`)
-              .then(res => res.json())
-              .then(data => { setUserData(data); setCurrentScreen('main'); setLoading(false); });
-          }}
-          style={{marginTop: '30px'}}
-        >
-          Вернуться на главную
-        </button>
+            fetch(`${API_URL}/get_user_data?user_id=${userId}`).then(res => res.json()).then(data => { setUserData(data); setCurrentScreen('main'); setLoading(false); });
+          }} style={{marginTop: '30px'}}>Вернуться на главную</button>
       </div>
     );
   }
