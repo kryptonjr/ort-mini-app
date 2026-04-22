@@ -3,7 +3,7 @@ import './App.css';
 
 
 const tg = window.Telegram.WebApp;
-const API_URL = "https://ort-bot.ru";
+const API_URL = "https://ort-bot.ru:8082";
 
 function App() {
   // === ОСНОВНЫЕ СОСТОЯНИЯ ===
