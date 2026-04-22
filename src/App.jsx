@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import qrImage from './qr.jpg';
 
 const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
@@ -235,8 +236,9 @@ function App() {
               </p>
 
               <div className="qr-container">
-                {/* ЗДЕСЬ ДОБАВЛЕН ?v=1 ЧТОБЫ СБРОСИТЬ КЭШ */}
-                <img src="/qr-final.jpg" alt="QR MBank" className="qr-image" />
+                {/* БЫЛО: <img src="/qr-mbank2.jpg?v=1" ... /> */}
+                {/* СТАЛО: */}
+                <img src={qrImage} alt="QR MBank" className="qr-image" />
               </div>
 
               <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
