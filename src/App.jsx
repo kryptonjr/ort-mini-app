@@ -5,13 +5,17 @@ const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
 
 function App() {
+  // === ОСНОВНЫЕ СОСТОЯНИЯ ===
   const [currentScreen, setCurrentScreen] = useState('main');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
 
+  // Опции
   const [useTimer, setUseTimer] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false); // Оставили только один стейт!
 
+  // === ТЕМА И ЦВЕТА ===
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     const savedTheme = localStorage.getItem('app_theme');
     if (savedTheme !== null) {
@@ -31,6 +35,7 @@ function App() {
     }
   }, [isDarkTheme]);
 
+  // === СОСТОЯНИЯ ТЕСТА ===
   const [selectedSubject, setSelectedSubject] = useState('');
   const [tasks, setTasks] = useState([]);
   const [currentTaskIdx, setCurrentTaskIdx] = useState(0);
@@ -42,30 +47,27 @@ function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // === БРОНЕБОЙНОЕ ИСПРАВЛЕНИЕ ID ===
-  // 1. Пытаемся получить ID из ссылки (наш запасной план из Python)
+  // === ПОЛУЧЕНИЕ ID (Защита + Fallback из ссылки) ===
   const urlParams = new URLSearchParams(window.location.search);
   const fallbackId = urlParams.get('user_id');
-
-  // 2. Берем ID либо от Телеграма, либо из нашей ссылки
   const userId = tg.initDataUnsafe?.user?.id || fallbackId;
 
+  // === ИНИЦИАЛИЗАЦИЯ ===
   useEffect(() => {
     tg.ready();
     tg.expand();
 
-    // Запрашиваем данные ТОЛЬКО если Телеграм успешно передал ID пользователя
     if (userId) {
       fetch(`${API_URL}/get_user_data?user_id=${userId}`)
         .then(res => res.json())
         .then(data => { setUserData(data); setLoading(false); })
         .catch(err => { console.error("Ошибка:", err); setLoading(false); });
     } else {
-      // Если ID нет, просто выключаем загрузку, чтобы показать экран ошибки
       setLoading(false);
     }
   }, [userId]);
 
+  // === ТАЙМЕР ===
   useEffect(() => {
     if (currentScreen === 'solving' && useTimer && timeLeft > 0) {
       const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
@@ -76,6 +78,7 @@ function App() {
     }
   }, [currentScreen, timeLeft, useTimer]);
 
+  // === ЛОГИКА ТЕСТОВ ===
   const handleSubjectClick = (subject) => {
     setSelectedSubject(subject);
     setCurrentScreen('amount_select');
@@ -178,6 +181,16 @@ function App() {
     .then(data => { setUserData(data); setLoading(false); });
   };
 
+  // === ОПЛАТА VIP ===
+  const handleBuyVip = () => {
+    setShowPaymentModal(false);
+    fetch(`${API_URL}/request_vip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    .then(() => alert("✅ Заявка отправлена! Менеджер подтвердит оплату в ближайшее время."));
+  };
 
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
@@ -190,22 +203,20 @@ function App() {
     );
   }
 
-  // === ЭКРАН ОТЛАДКИ (DEBUG) ===
   if (!userId) {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center'}}>
         <div style={{fontSize: '4rem', marginBottom: '10px'}}>🔒</div>
         <h2 className="title" style={{marginBottom: '10px', color: isDarkTheme ? '#fff' : '#111'}}>Доступ закрыт</h2>
         <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>
-          Телеграм не передал твой ID.
+          Телеграм не передал твой ID. Попробуй запустить бота с мобильного телефона или нажми /start.
         </p>
-
-        {/* Техническая информация для нас с тобой */}
         <div style={{marginTop: '20px', padding: '15px', background: '#111', color: '#0f0', borderRadius: '12px', fontSize: '0.85rem', width: '100%', wordBreak: 'break-all', textAlign: 'left', border: '1px solid #333'}}>
           <b>⚙️ DEBUG INFO:</b><br/><br/>
           <b>initDataUnsafe:</b> {JSON.stringify(tg.initDataUnsafe)}<br/><br/>
           <b>version:</b> {tg.version || 'Не определена'}<br/>
-          <b>platform:</b> {tg.platform || 'Не определена'}
+          <b>platform:</b> {tg.platform || 'Не определена'}<br/>
+          <b>fallback_id:</b> {fallbackId || 'Пусто'}
         </div>
       </div>
     );
@@ -215,6 +226,32 @@ function App() {
     const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+
+        {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ */}
+        {showPaymentModal && (
+          <div className="modal-overlay">
+            <div className="modal-content geometric-dark">
+              <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem' }}>Оплата VIP-статуса</h3>
+              <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
+                Отсканируй QR-код через приложение <b>MBank</b> или сохрани картинку и загрузи в банк.
+              </p>
+
+              <div className="qr-container">
+                <img src="/qr-mbank.jpg" alt="QR MBank" className="qr-image" />
+              </div>
+
+              <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
+                После перевода обязательно нажми кнопку ниже, чтобы мы проверили платеж.
+              </p>
+
+              <div className="modal-buttons">
+                <button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button>
+                <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="modern-header">
           <div className="modern-logo">🧬 O.R.T. AI</div>
           <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
@@ -263,7 +300,7 @@ function App() {
             </div>
           </div>
         </div>
-        <button className="modern-btn vip-btn" onClick={() => alert('VIP-статус приобретается через поддержку!')}>🚀 VIP Разбор ИИ</button>
+        <button className="modern-btn vip-btn" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
         <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
       </div>
     );
