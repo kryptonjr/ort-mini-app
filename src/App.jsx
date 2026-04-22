@@ -1,4 +1,30 @@
+import { useState, useEffect } from 'react';
+import './App.css';
 
+const tg = window.Telegram.WebApp;
+const API_URL = "https://ort-bot.ru";
+
+function App() {
+  // === ОСНОВНЫЕ СОСТОЯНИЯ ===
+  const [currentScreen, setCurrentScreen] = useState('main');
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  // Опции
+  const [useTimer, setUseTimer] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // === ОПЛАТА VIP ===
+  const handleBuyVip = () => {
+    setShowPaymentModal(false);
+    fetch(`${API_URL}/request_vip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    .then(() => alert("✅ Заявка отправлена! Менеджер подтвердит оплату в ближайшее время."));
+  };
 
   // === ТЕМА И ЦВЕТА ===
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
@@ -32,7 +58,7 @@
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // === ПОЛУЧЕНИЕ ID (Защита + Fallback из ссылки) ===
+  // === ПОЛУЧЕНИЕ ID ===
   const urlParams = new URLSearchParams(window.location.search);
   const fallbackId = urlParams.get('user_id');
   const userId = tg.initDataUnsafe?.user?.id || fallbackId;
@@ -88,9 +114,7 @@
         setSolvedIds([]);
         setUserAnswers([]);
         setAiFeedback("");
-
         setTimeLeft(useTimer ? amount * 60 : -1);
-
         setCurrentScreen('solving');
         setLoading(false);
       })
@@ -166,17 +190,6 @@
     .then(data => { setUserData(data); setLoading(false); });
   };
 
-  // === ОПЛАТА VIP ===
-  const handleBuyVip = () => {
-    setShowPaymentModal(false);
-    fetch(`${API_URL}/request_vip`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
-    })
-    .then(() => alert("✅ Заявка отправлена! Менеджер подтвердит оплату в ближайшее время."));
-  };
-
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
   if (loading) {
@@ -222,6 +235,7 @@
               </p>
 
               <div className="qr-container">
+                {/* ЗДЕСЬ ДОБАВЛЕН ?v=1 ЧТОБЫ СБРОСИТЬ КЭШ */}
                 <img src="/qr-mbank2.jpg?v=1" alt="QR MBank" className="qr-image" />
               </div>
 
