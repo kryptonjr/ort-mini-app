@@ -227,26 +227,20 @@ function App() {
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
 
         {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ */}
+        {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ (ЗАГЛУШКА "В РАЗРАБОТКЕ") */}
         {showPaymentModal && (
           <div className="modal-overlay">
-            <div className="modal-content geometric-dark">
-              <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem' }}>Оплата VIP-статуса</h3>
-              <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
-                Отсканируй QR-код через приложение <b>MBank</b> или сохрани картинку и загрузи в банк.
+            <div className="modal-content geometric-dark" style={{ padding: '40px 20px' }}>
+              <div style={{ fontSize: '4rem', marginBottom: '15px', animation: 'pulse 2s infinite' }}>🚧</div>
+              <h3 style={{ margin: '0 0 15px 0', fontSize: '1.6rem', color: '#fff' }}>Скоро запуск!</h3>
+              <p style={{ color: '#bbb', fontSize: '1rem', marginBottom: '30px', lineHeight: '1.6' }}>
+                Прямо сейчас мы настраиваем платежную систему. VIP-разборы от ИИ станут доступны совсем скоро.<br/><br/>
+                Заглядывай завтра! 😉
               </p>
-
-              <div className="qr-container">
-                {/* Вставляем прямую ссылку из интернета */}
-                <img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR MBank" className="qr-image" />
-              </div>
-
-              <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
-                После перевода обязательно нажми кнопку ниже, чтобы мы проверили платеж.
-              </p>
-
               <div className="modal-buttons">
-                <button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button>
-                <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button>
+                <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>
+                  Понятно, жду
+                </button>
               </div>
             </div>
           </div>
