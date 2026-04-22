@@ -222,7 +222,7 @@
               </p>
 
               <div className="qr-container">
-                <img src="/qr-mbank2.jpg" alt="QR MBank" className="qr-image" />
+                <img src="/qr-mbank2.jpg?v=1" alt="QR MBank" className="qr-image" />
               </div>
 
               <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
