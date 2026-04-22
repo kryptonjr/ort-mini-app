@@ -1,79 +1,35 @@
-/* Фикс сдвига вправо для всех элементов */
+/* =========================================
+   БАЗОВЫЙ СБРОС И ШРИФТЫ
+   ========================================= */
 * {
   box-sizing: border-box;
-}
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-}
-.task-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-}
-.answer-input {
-  width: 100%;
-  padding: 15px;
-  border: 2px solid #edf2f7;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  outline: none;
-  transition: border 0.2s;
-}
-.answer-input:focus { border-color: #3aa1e9; }
-.submit-btn { width: 100%; margin-top: auto; }
-
-.task-images-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 15px;
-  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.task-image {
-  width: 100%;
-  border-radius: 8px;
-  object-fit: contain;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f4f7fb;
+  color: #111;
 }
 
-.task-text {
-  margin-top: 10px;
-  line-height: 1.5;
-  white-space: pre-wrap; /* Чтобы сохранялись переносы строк из БД */
+/* =========================================
+   ОСНОВНОЙ КОНТЕЙНЕР
+   ========================================= */
+.app-container {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 20px 15px;
+  background: #f4f7fb;
 }
 
-.answer-section {
-  width: 100%;
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.ai-feedback-box {
-  width: 100%;
-  background: #f8f9fa;
-  border-left: 4px solid #3aa1e9;
-  padding: 15px;
-  border-radius: 8px;
-  text-align: left;
-}
-
-.ai-loading {
+.loading, .ai-loading {
+  text-align: center;
   color: #666;
   font-style: italic;
   animation: pulse 1.5s infinite;
+  margin-top: 50px;
 }
 
 @keyframes pulse {
@@ -82,48 +38,39 @@
   100% { opacity: 0.6; }
 }
 
-.ai-text {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #333;
-}
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Две одинаковые колонки */
-  gap: 10px;
-  margin-top: 15px;
-  width: 100%;
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(58, 161, 233, 0.2);
+  border-top: 5px solid #3aa1e9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
 }
 
-.stat-item {
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f4f6f8;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: #555;
+  justify-content: center;
+  height: 100vh;
 }
 
-.stat-item b {
-  font-size: 1.2rem;
-  color: #3aa1e9;
-  margin-top: 4px;
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 /* =========================================
-   НОВЫЙ ДИЗАЙН ГЛАВНОГО ЭКРАНА (MODERN UI)
+   НОВЫЙ ДИЗАЙН ГЛАВНОГО ЭКРАНА И ПРОФИЛЯ
    ========================================= */
-
-.modern-ui {
-  background: #f4f7fb; /* Светлый фон как на макете */
-  min-height: 100vh;
-  padding: 20px 15px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.modern-header {
+.modern-header, .modern-profile-header {
   text-align: center;
   margin-bottom: 25px;
 }
@@ -135,16 +82,15 @@
   color: #111;
 }
 
-.modern-header h2 {
+.modern-header h2, .modern-profile-header h2 {
   font-size: 1.4rem;
   margin: 0 0 5px 0;
   color: #222;
 }
 
-.modern-header .subtitle {
+.subtitle {
   color: #777;
   font-size: 0.95rem;
-  margin: 0;
 }
 
 /* Главная карточка (Синий градиент) */
@@ -154,16 +100,14 @@
   padding: 20px;
   display: flex;
   align-items: center;
-  color: white;
+  color: white !important;
   box-shadow: 0 10px 20px rgba(9, 132, 227, 0.3);
   margin-bottom: 20px;
   cursor: pointer;
   transition: transform 0.2s;
 }
 
-.main-action-card:active {
-  transform: scale(0.97);
-}
+.main-action-card:active { transform: scale(0.97); }
 
 .card-icon-large {
   font-size: 3rem;
@@ -177,18 +121,10 @@
   margin-right: 15px;
 }
 
-.card-text h3 {
-  margin: 0 0 5px 0;
-  font-size: 1.5rem;
-}
+.card-text h3 { margin: 0 0 5px 0; font-size: 1.5rem; color: white !important;}
+.card-text p { margin: 0; opacity: 0.9; font-size: 0.95rem; color: white !important;}
 
-.card-text p {
-  margin: 0;
-  opacity: 0.9;
-  font-size: 0.95rem;
-}
-
-/* Сетка из 3 карточек */
+/* Сетка из 3 карточек (Главный экран) */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -202,30 +138,18 @@
   text-align: center;
   box-shadow: 0 6px 15px rgba(0,0,0,0.05);
   cursor: pointer;
+  background: white;
 }
 
-.dash-card h4 {
-  margin: 10px 0 5px 0;
-  font-size: 0.85rem;
-  color: #333;
-}
-
-.dash-card p {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #666;
-}
-
-.dash-icon {
-  font-size: 1.8rem;
-  margin-bottom: 5px;
-}
+.dash-icon { font-size: 1.8rem; margin-bottom: 5px; }
+.dash-card h4 { margin: 10px 0 5px 0; font-size: 0.85rem; color: #333; }
+.dash-card p { margin: 0; font-size: 0.75rem; color: #666; }
 
 .profile-card { background: linear-gradient(135deg, #f3e5f5, #e1bee7); }
 .help-card { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
 .leader-card { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
 
-/* Секция Баллов */
+/* Секция Баллов (Главный экран) */
 .scores-section {
   background: white;
   border-radius: 20px;
@@ -234,45 +158,24 @@
   margin-bottom: 20px;
 }
 
-.section-title {
-  margin: 0 0 15px 0;
-  font-size: 1.1rem;
-  color: #222;
-}
-
-.scores-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.score-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 30%;
-}
-
+.section-title { margin: 0 0 15px 0; font-size: 1.1rem; color: #222; text-align: center; }
+.scores-row { display: flex; justify-content: space-between; }
+.score-col { display: flex; flex-direction: column; align-items: center; width: 30%; }
 .score-icon { font-size: 1.8rem; margin-bottom: 8px; }
 .score-label { font-size: 0.75rem; color: #555; font-weight: bold; margin-bottom: 8px; text-align: center; height: 24px;}
-
-.progress-bar {
-  width: 100%;
-  height: 6px;
-  background: #eee;
-  border-radius: 10px;
-  margin-bottom: 5px;
-  overflow: hidden;
-}
-
+.progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 10px; margin-bottom: 5px; overflow: hidden; }
 .fill { height: 100%; border-radius: 10px; }
 .math-fill { background: #3498db; }
 .grammar-fill { background: #2ecc71; }
 .reading-fill { background: #e74c3c; }
-
 .score-val { font-size: 0.7rem; color: #888; }
 
-/* Нижние кнопки */
-.modern-btn {
+/* =========================================
+   КНОПКИ
+   ========================================= */
+.buttons-column { display: flex; flex-direction: column; gap: 10px; }
+
+.modern-btn, .primary-btn, .back-button {
   width: 100%;
   padding: 16px;
   border-radius: 16px;
@@ -286,295 +189,154 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  text-align: center;
 }
 
-.vip-btn {
-  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
-  color: #333;
-}
+.vip-btn { background: linear-gradient(135deg, #f5f7fa, #e4e8f0); color: #333; }
+.exit-btn { background: white; color: #e74c3c; border: 1px solid #ffeaea; }
+.lang-btn { background: linear-gradient(135deg, #2f80ed, #1565c0); color: white; box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3); }
+.back-btn-outline { background: white; color: #111; border: 2px solid #a44040; box-shadow: none; }
 
-.exit-btn {
-  background: white;
-  color: #e74c3c;
-  border: 1px solid #ffeaea;
-}
 /* =========================================
-   ЭКРАН ТРЕНИРОВКИ (ВЫБОР ПРЕДМЕТОВ)
+   ПРОФИЛЬ И ЛИДЕРБОРД
    ========================================= */
+.profile-title { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+.profile-avatar { font-size: 2rem; background: rgba(0,0,0,0.05); border-radius: 50%; padding: 5px; }
+.profile-greeting { font-size: 1.2rem; margin: 5px 0; color: #333; }
+.profile-meta { color: #888; font-size: 0.9rem; margin: 0; }
+.tasks-solved { text-align: center; color: #555; font-size: 1rem; margin-bottom: 20px; }
+.tasks-solved b { color: #111; }
+.profile-card-real { background: white; padding: 20px; border-radius: 16px; text-align: left; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-.subjects-grid-modern {
+/* =========================================
+   КАРТОЧКИ ПРЕДМЕТОВ И ПОМОЩИ (ЦВЕТНЫЕ)
+   ========================================= */
+.subjects-grid-modern, .profile-stats-grid, .help-cards-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
-.subject-card-modern {
+.subject-card-modern, .stat-card-modern {
   border-radius: 20px;
   padding: 20px 10px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  min-height: 140px;
 }
 
-.subject-card-modern:active {
-  transform: scale(0.95);
-}
+.subject-card-modern { flex-direction: column; min-height: 140px; }
+.stat-card-modern { padding: 12px; gap: 12px; }
+.help-cards-grid .stat-card-modern { flex-direction: column; text-align: center; padding: 20px 10px; }
 
-/* Эффект матового стекла (Glassmorphism) для иконки */
-.subject-icon-glass {
+.subject-card-modern:active, .stat-card-modern:active { transform: scale(0.95); }
+
+.subject-icon-glass, .stat-icon-glass {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  width: 55px;
-  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  font-size: 1.8rem;
-  margin-bottom: 15px;
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.subject-name-modern {
-  font-weight: 700;
-  color: #222;
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
+.subject-icon-glass { width: 55px; height: 55px; border-radius: 14px; font-size: 1.8rem; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+.stat-icon-glass { width: 40px; height: 40px; border-radius: 10px; font-size: 1.2rem; }
 
-/* Градиенты карточек как на макете */
-.subj-blue {
-  background: linear-gradient(135deg, #8cb5f3 0%, #aed2f9 100%);
-  box-shadow: 0 8px 16px rgba(140, 181, 243, 0.35);
-}
-.subj-green {
-  background: linear-gradient(135deg, #9ae29d 0%, #c5f1c7 100%);
-  box-shadow: 0 8px 16px rgba(154, 226, 157, 0.35);
-}
-.subj-purple {
-  background: linear-gradient(135deg, #b8a6f6 0%, #dcd3fc 100%);
-  box-shadow: 0 8px 16px rgba(184, 166, 246, 0.35);
-}
-.subj-orange {
-  background: linear-gradient(135deg, #f7ba6d 0%, #fed8a6 100%);
-  box-shadow: 0 8px 16px rgba(247, 186, 109, 0.35);
-}
-.subj-teal {
-  background: linear-gradient(135deg, #6fdcd0 0%, #a3ede4 100%);
-  box-shadow: 0 8px 16px rgba(111, 220, 208, 0.35);
-}
-.subj-red {
-  background: linear-gradient(135deg, #f38b8b 0%, #fcbaba 100%);
-  box-shadow: 0 8px 16px rgba(243, 139, 139, 0.35);
-}
+.subject-name-modern { font-weight: 700; color: #222; font-size: 0.95rem; line-height: 1.2; }
+.stat-text { display: flex; flex-direction: column; text-align: left; }
+.stat-label, .help-title-modern { font-size: 0.85rem; color: #444; font-weight: 700; }
+.stat-score { font-size: 1.1rem; font-weight: 800; color: #111; }
+.help-subtitle { font-size: 0.75rem; color: #444; line-height: 1.4; height: 48px; display: flex; align-items: center; }
 
-/* Кнопка возврата с красной рамкой */
-.back-btn-outline {
-  background: white;
-  color: #111;
-  border: 2px solid #a44040; /* Темно-красная рамка */
-  box-shadow: none;
-}
+/* Градиенты карточек */
+.subj-blue { background: linear-gradient(135deg, #8cb5f3 0%, #aed2f9 100%); box-shadow: 0 8px 16px rgba(140, 181, 243, 0.35); }
+.subj-green { background: linear-gradient(135deg, #9ae29d 0%, #c5f1c7 100%); box-shadow: 0 8px 16px rgba(154, 226, 157, 0.35); }
+.subj-purple { background: linear-gradient(135deg, #b8a6f6 0%, #dcd3fc 100%); box-shadow: 0 8px 16px rgba(184, 166, 246, 0.35); }
+.subj-orange { background: linear-gradient(135deg, #f7ba6d 0%, #fed8a6 100%); box-shadow: 0 8px 16px rgba(247, 186, 109, 0.35); }
+.subj-teal { background: linear-gradient(135deg, #6fdcd0 0%, #a3ede4 100%); box-shadow: 0 8px 16px rgba(111, 220, 208, 0.35); }
+.subj-red { background: linear-gradient(135deg, #f38b8b 0%, #fcbaba 100%); box-shadow: 0 8px 16px rgba(243, 139, 139, 0.35); }
+
+.vip-support-btn { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); width: 100%; margin-bottom: 20px;}
+
 /* =========================================
-   НОВЫЙ ДИЗАЙН ПРОФИЛЯ
+   ЭКРАН ТЕСТА (ЗАДАЧИ)
+   ========================================= */
+.task-header { display: flex; justify-content: space-between; width: 100%; color: #666; font-size: 0.9rem; margin-bottom: 15px; }
+.task-content { background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; font-size: 1.1rem; }
+.task-images-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; width: 100%; }
+.task-image { width: 100%; border-radius: 8px; object-fit: contain; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.task-text { margin-top: 10px; line-height: 1.5; white-space: pre-wrap; color: #111;}
+.answer-section { width: 100%; background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.answer-input { width: 100%; padding: 15px; border: 2px solid #edf2f7; border-radius: 12px; font-size: 1.1rem; margin-bottom: 15px; outline: none; transition: border 0.2s; background: white; color: #111;}
+.answer-input:focus { border-color: #3aa1e9; }
+.ai-feedback-box { width: 100%; background: #f8f9fa; border-left: 4px solid #3aa1e9; padding: 20px; border-radius: 16px; text-align: left; }
+.ai-text { font-size: 1rem; line-height: 1.5; color: #333; }
+
+select.answer-input {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px top 50%;
+  background-size: 12px auto;
+}
+
+/* =========================================
+   ТЕМНАЯ ТЕМА (DARK MODE) - ФИНАЛЬНЫЙ ФИКС
    ========================================= */
 
-.modern-profile-header {
-  text-align: center;
-  margin-bottom: 25px;
+/* 1. Общий фон и цвет текста по умолчанию */
+.dark-theme.app-container {
+  background: #121212 !important;
+  color: #ffffff !important;
 }
 
-.profile-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-.profile-avatar {
-  font-size: 2rem;
-  background: rgba(0,0,0,0.05);
-  border-radius: 50%;
-  padding: 5px;
-}
-
-.modern-profile-header h2 {
-  font-size: 1.8rem;
-  margin: 0;
-  color: #111;
-}
-
-.profile-greeting {
-  font-size: 1.2rem;
-  margin: 5px 0;
-  color: #333;
-}
-
-.profile-meta {
-  color: #888;
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-/* Сетка карточек в профиле */
-.profile-stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.stat-card-modern {
-  border-radius: 16px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: transform 0.2s;
-}
-
-.stat-icon-glass {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  font-size: 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.stat-text {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #444;
-  font-weight: 600;
-}
-
-.stat-score {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #111;
-}
-
-/* Подвал профиля */
-.tasks-solved {
-  text-align: center;
-  color: #555;
-  font-size: 1rem;
-  margin-bottom: 20px;
-}
-
-.tasks-solved b {
-  color: #111;
-}
-
-/* Синяя кнопка переключения языка как на картинке */
-.lang-btn {
-  background: linear-gradient(135deg, #2f80ed, #1565c0);
-  color: white;
-  border: none;
-  box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3);
-}
-/* =========================================
-   ЭКРАН ПОМОЩИ (MODERN UI)
-   ========================================= */
-
-.help-cards-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-/* Переиспользуем стиль карточки stat-card-modern из предметов, но адаптируем */
-.help-cards-grid .stat-card-modern {
-  flex-direction: column;
-  text-align: center;
-  padding: 20px 10px;
-}
-
-.help-title-modern {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 8px;
-}
-
-.help-subtitle {
-  font-size: 0.75rem;
-  color: #666;
-  line-height: 1.4;
-  height: 48px; /* Фиксированная высота для выравнивания */
-  display: flex;
-  align-items: center;
-}
-
-/* Стили для блока поддержки */
-.vip-support-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-  margin: 0 auto;
-  width: 100%;
-}
-
-.vip-support-btn:active {
-  transform: scale(0.98);
-}
-
-.vip-support-btn .modern-btn {
-  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
-  color: #3aa1e9;
-  border: none;
-  box-shadow: none;
-  margin: 0;
-}
-/* =========================================
-   ТЕМНАЯ ТЕМА (DARK MODE) - ИСПРАВЛЕННАЯ (С УЛУЧШЕННЫМ КОНТРАСТОМ)
-   ========================================= */
-.dark-theme.modern-ui {
-  background: #121212 !important; /* Глубокий черный фон для всего приложения */
-  color: #ffffff !important; /* Белый цвет текста по умолчанию для всего приложения в темной теме */
-}
-
-/* ПРИМЕЧАНИЕ: Я УДАЛИЛ длинный список селекторов для перекрашивания текстов в белый,
-   так как теперь это цвет по умолчанию. Это делает CSS чище и надежнее.
-*/
-
-/* Второстепенные тексты в светло-серый (переопределяет белый) */
-.dark-theme .profile-meta,
-.dark-theme .help-subtitle,
+/* 2. Заголовки, логотипы и основной текст на черном фоне -> БЕЛЫЕ */
+.dark-theme .modern-logo,
+.dark-theme .modern-header h2,
+.dark-theme .modern-profile-header h2,
+.dark-theme .profile-greeting,
+.dark-theme .title,
 .dark-theme .tasks-solved,
-.dark-theme .subtitle,
-.dark-theme .stat-label {
-  color: #aaaaaa !important;
+.dark-theme .tasks-solved b,
+.dark-theme .task-text,
+.dark-theme .ai-text,
+.dark-theme .score-label {
+  color: #ffffff !important;
 }
 
-/* Остальные правила темной темы остаются без изменений, так как они работают верно */
+/* 3. Подзаголовки и мета-информация -> СВЕТЛО-СЕРЫЕ */
+.dark-theme .subtitle,
+.dark-theme .profile-meta,
+.dark-theme .score-val,
+.dark-theme .task-header,
+.dark-theme .task-header span {
+  color: #bbbbbb !important;
+}
+
+/* 4. ЦВЕТНЫЕ КАРТОЧКИ (Предметы, Статистика, Помощь) */
 .dark-theme .stat-card-modern,
-.dark-theme .subject-card-modern,
-.dark-theme .main-action-card {
+.dark-theme .subject-card-modern {
   box-shadow: 0 4px 15px rgba(0,0,0,0.8) !important;
 }
 
+/* ТЕКСТ ВНУТРИ ЦВЕТНЫХ КАРТОЧЕК -> ТЕМНЫЙ (чтобы читался на пастельном фоне) */
+.dark-theme .stat-card-modern:not(.vip-support-btn) .stat-label,
+.dark-theme .stat-card-modern:not(.vip-support-btn) .stat-score,
+.dark-theme .stat-card-modern:not(.vip-support-btn) .help-title-modern,
+.dark-theme .stat-card-modern:not(.vip-support-btn) .help-subtitle,
+.dark-theme .subject-card-modern .subject-name-modern {
+  color: #111111 !important;
+}
+
+/* 5. БЫВШИЕ "БЕЛЫЕ" ПЛАШКИ (Задачи, Лидерборд, Инпуты) -> ТЕМНО-СЕРЫЕ */
 .dark-theme .vip-support-btn,
 .dark-theme .task-content,
 .dark-theme .answer-section,
@@ -582,23 +344,33 @@
 .dark-theme .profile-card-real,
 .dark-theme .ai-feedback-box {
   background: #1e1e1e !important;
-  border-color: #333 !important;
+  border: 1px solid #333 !important;
+  color: #ffffff !important;
 }
 
-.dark-theme .back-btn-outline {
-  background: #121212 !important;
-  color: #fff !important;
+/* Текст внутри карточки Поддержки (она теперь черная) -> белый */
+.dark-theme .vip-support-btn .help-title-modern,
+.dark-theme .vip-support-btn .help-subtitle {
+   color: #ffffff !important;
+}
+
+/* Лидерборд (внутри белые тексты) */
+.dark-theme .profile-card-real b,
+.dark-theme .profile-card-real span,
+.dark-theme .profile-card-real p {
+  color: #ffffff !important;
+}
+
+/* 6. ИНПУТЫ И КНОПКИ */
+.dark-theme .answer-input {
+  background: #2c2c2c !important;
+  color: #ffffff !important;
   border: 1px solid #555 !important;
 }
 
-.dark-theme .theme-btn {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #444;
-}
-
-.dark-theme .answer-input {
-  background: #2c2c2c !important;
-  color: white !important;
+.dark-theme .theme-btn,
+.dark-theme .back-btn-outline {
+  background: #2a2a2a !important;
+  color: #ffffff !important;
   border: 1px solid #555 !important;
 }
