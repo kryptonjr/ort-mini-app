@@ -400,21 +400,40 @@ function App() {
         </div>
         <div className="scores-section">
           <h3 className="section-title">Мои Баллы</h3>
-          <div className="scores-row">
-            <div className="score-col">
+          <div className="scores-row scrollable-row">
+            {/* Карточка 1: Math */}
+            <div className="score-col score-snap">
               <div className="score-icon">🧮</div><span className="score-label">Math</span>
               <div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div>
               <span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span>
             </div>
-            <div className="score-col">
+
+            {/* Карточка 2: Grammar */}
+            <div className="score-col score-snap">
               <div className="score-icon">📜</div><span className="score-label">Grammar</span>
               <div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div>
               <span className="score-val">{userData?.scores?.grammar || 0} pts</span>
             </div>
-            <div className="score-col">
+
+            {/* Карточка 3: Reading */}
+            <div className="score-col score-snap">
               <div className="score-icon">👁️</div><span className="score-label">Reading</span>
               <div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div>
               <span className="score-val">{userData?.scores?.reading || 0} pts</span>
+            </div>
+
+            {/* Карточка 4: Аналогии */}
+            <div className="score-col score-snap">
+              <div className="score-icon">🔗</div><span className="score-label">Analogies</span>
+              <div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.analogies || 0) * 5, 100)}%`, background: '#9b59b6'}}></div></div>
+              <span className="score-val">{userData?.scores?.analogies || 0} pts</span>
+            </div>
+
+            {/* Карточка 5: Дополнение предложений */}
+            <div className="score-col score-snap">
+              <div className="score-icon">📝</div><span className="score-label">Sentences</span>
+              <div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.sentences || 0) * 5, 100)}%`, background: '#f39c12'}}></div></div>
+              <span className="score-val">{userData?.scores?.sentences || 0} pts</span>
             </div>
           </div>
         </div>

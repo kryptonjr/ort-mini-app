@@ -507,3 +507,49 @@ select.answer-input {
 .modal-buttons .modern-btn {
   margin-bottom: 0; /* Убираем лишний отступ в модалке */
 }
+/* =========================================
+   АНИМАЦИЯ И СКРОЛЛ ДЛЯ БАЛЛОВ (КАРУСЕЛЬ)
+   ========================================= */
+
+/* Делаем строку прокручиваемой */
+.scores-row.scrollable-row {
+  display: flex;
+  justify-content: flex-start; /* Убираем space-between */
+  gap: 20px; /* Расстояние между ачивками */
+  overflow-x: auto; /* Включаем горизонтальный скролл */
+  scroll-snap-type: x mandatory; /* Включаем "магниты" при свайпе */
+  padding-bottom: 15px; /* Место под ползунок */
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на iPhone */
+
+  /* Прячем стандартный скроллбар в Firefox/IE */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+
+/* Настраиваем красоту скроллбара для Chrome/Safari/Telegram */
+.scores-row.scrollable-row::-webkit-scrollbar {
+  height: 6px;
+}
+.scores-row.scrollable-row::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scores-row.scrollable-row::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+  border-radius: 10px;
+}
+.dark-theme .scores-row.scrollable-row::-webkit-scrollbar-thumb {
+  background-color: #444;
+}
+
+/* Настройка самих карточек внутри карусели */
+.score-col.score-snap {
+  flex: 0 0 30%; /* Карточка занимает 30% ширины экрана, чтобы остальные выглядывали сбоку */
+  min-width: 90px; /* Минимальная ширина, чтобы не сплющивались */
+  scroll-snap-align: start; /* Карточка "примагничивается" к левому краю */
+  transition: transform 0.2s ease;
+}
+
+/* Легкая анимация при нажатии на карточку достижения */
+.score-col.score-snap:active {
+  transform: scale(0.95);
+}
