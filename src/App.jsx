@@ -326,7 +326,7 @@ function App() {
             </div>
           </div>
         </div>
-        <button className="modern-btn vip-btn" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
+        <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
         <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
       </div>
     );
