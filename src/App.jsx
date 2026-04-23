@@ -11,6 +11,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+
   // --- ПЕРЕНЕСИ СЮДА (внутри App) ---
   const [regData, setRegData] = useState({
     real_name: '',
@@ -402,7 +403,8 @@ function App() {
           </div>
         </div>
         <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
-        {/* СЮДА ВСТАВЛЯЕМ КНОПКУ АДМИНКИ */}
+
+        {/* КНОПКА ПАНЕЛИ УПРАВЛЕНИЯ ЗДЕСЬ */}
         {userData?.role === 'admin' && (
           <button
             className="modern-btn"
@@ -421,6 +423,7 @@ function App() {
             ⚙️ Панель управления
           </button>
         )}
+
         <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
       </div>
     );
@@ -702,15 +705,55 @@ function App() {
     );
   }
 
-  // ВСТАВЛЯЙ ЭКРАН ТАБЛИЦЫ СЮДА (перед return null)
+  // --- ЭКРАН ПАНЕЛИ УПРАВЛЕНИЯ ---
   if (currentScreen === 'admin_panel') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        {/* ... тут код таблицы, который я давал выше ... */}
+        <div className="modern-header">
+          <h2>👑 Админ-панель</h2>
+          <p className="subtitle">Всего учеников: {allUsers.length}</p>
+        </div>
+
+        <div style={{overflowX: 'auto', marginBottom: '20px'}}>
+          <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left'}}>
+            <thead>
+              <tr style={{borderBottom: `2px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
+                <th style={{padding: '10px'}}>ID / Имя</th>
+                <th style={{padding: '10px'}}>Статус</th>
+                <th style={{padding: '10px'}}>Город / Школа</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allUsers.map(user => (
+                <tr key={user.id} style={{borderBottom: `1px solid ${isDarkTheme ? '#222' : '#f9f9f9'}`}}>
+                  <td style={{padding: '10px'}}>
+                    <b>#{user.id}</b><br/>
+                    {user.real_name || `@${user.username}` || 'Инкогнито'}
+                  </td>
+                  <td style={{padding: '10px'}}>
+                    <span style={{
+                      padding: '2px 6px', borderRadius: '4px',
+                      background: user.role === 'vip' ? '#FFD700' : (user.role === 'admin' ? '#3aa1e9' : '#eee'),
+                      color: '#111', fontSize: '0.7rem', fontWeight: 'bold'
+                    }}>
+                      {user.role.toUpperCase()}
+                    </span>
+                  </td>
+                  <td style={{padding: '10px', color: '#888'}}>
+                    {user.city || '—'}<br/>
+                    {user.school ? `Школа №${user.school}` : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
+
   return null;
 }
 
