@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 const tg = window.Telegram.WebApp;
-const API_URL = "https://ort-bot.ru:8082";
+const API_URL = "https://ort-bot.ru";
 
 function App() {
   // === ОСНОВНЫЕ СОСТОЯНИЯ ===
