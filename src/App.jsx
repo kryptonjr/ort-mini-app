@@ -267,7 +267,7 @@ function App() {
             <div className="dash-icon">👤</div><h4>Профиль</h4><p>{totalScore} баллов</p>
           </div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
-            <div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p>
+            <div className="dash-icon">🆘</div><h4>Пмощь</h4><p>Инструкции</p>
           </div>
           <div className="dash-card leader-card" onClick={() => {
             setLoading(true);
