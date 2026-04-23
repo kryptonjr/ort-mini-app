@@ -10,6 +10,7 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   // --- ПЕРЕНЕСИ СЮДА (внутри App) ---
   const [regData, setRegData] = useState({
     real_name: '',
@@ -401,6 +402,25 @@ function App() {
           </div>
         </div>
         <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
+        {/* СЮДА ВСТАВЛЯЕМ КНОПКУ АДМИНКИ */}
+        {userData?.role === 'admin' && (
+          <button
+            className="modern-btn"
+            style={{background: '#2c3e50', color: 'white', marginTop: '10px'}}
+            onClick={() => {
+              setLoading(true);
+              fetch(`${API_URL}/get_all_users`)
+                .then(res => res.json())
+                .then(data => {
+                  setAllUsers(data);
+                  setCurrentScreen('admin_panel');
+                  setLoading(false);
+                });
+            }}
+          >
+            ⚙️ Панель управления
+          </button>
+        )}
         <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
       </div>
     );
@@ -682,6 +702,15 @@ function App() {
     );
   }
 
+  // ВСТАВЛЯЙ ЭКРАН ТАБЛИЦЫ СЮДА (перед return null)
+  if (currentScreen === 'admin_panel') {
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        {/* ... тут код таблицы, который я давал выше ... */}
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+      </div>
+    );
+  }
   return null;
 }
 
