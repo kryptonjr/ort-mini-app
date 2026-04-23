@@ -522,26 +522,88 @@ function App() {
   }
 
   if (currentScreen === 'result') {
+    // Фильтруем только те ответы, где ученик ошибся
+    const mistakes = userAnswers.filter(ans => !ans.isCorrect);
+
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🎉 Тест завершен!</h2>
-        <div className="stat-card-modern subj-blue" style={{flexDirection: 'column', padding: '30px', marginBottom: '20px'}}>
-          <p style={{fontSize: '1.2rem', margin: '0 0 10px 0', opacity: 0.9}}>Твой результат:</p>
-          <h1 style={{fontSize: '3rem', margin: 0, color: '#111'}}>{correctCount} / {tasks.length}</h1>
+
+        <div className="stat-card-modern subj-blue" style={{flexDirection: 'column', padding: '30px', marginBottom: '30px'}}>
+          <p style={{fontSize: '1.2rem', margin: '0 0 10px 0', opacity: 0.9, color: '#111'}}>Твой результат:</p>
+          <h1 style={{fontSize: '3.5rem', margin: 0, color: '#111'}}>{correctCount} / {tasks.length}</h1>
         </div>
-        <div className="ai-feedback-box" style={{background: isDarkTheme ? '#1e1e1e' : '#f8f9fa', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #3aa1e9'}}>
+
+        {/* СПИСОК ОШИБОК (если они есть) */}
+        {mistakes.length > 0 && (
+          <div className="mistakes-section" style={{marginBottom: '30px'}}>
+            <h3 style={{marginBottom: '15px', paddingLeft: '5px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+              ❌ Разбор ошибок ({mistakes.length})
+            </h3>
+
+            {mistakes.map((m, idx) => {
+              const taskImages = m.task.image_url ? m.task.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
+              return (
+                <div key={idx} className="task-content" style={{
+                  background: isDarkTheme ? '#1e1e1e' : 'white',
+                  border: '1px solid #ff4d4d', // Подсвечиваем рамку красным
+                  marginBottom: '15px',
+                  padding: '15px'
+                }}>
+                  <p style={{fontSize: '0.8rem', color: '#888', marginBottom: '10px', fontWeight: 'bold'}}>ЗАДАНИЕ №{userAnswers.indexOf(m) + 1}</p>
+
+                  {taskImages.length > 0 && (
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px'}}>
+                      {taskImages.map((url, i) => <img key={i} src={url} alt="Задание" style={{width: '100%', borderRadius: '8px', border: '1px solid #eee'}} />)}
+                    </div>
+                  )}
+
+                  <p style={{marginBottom: '15px', lineHeight: '1.4'}}>{m.task.question}</p>
+
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem'}}>
+                    <div style={{padding: '10px', background: isDarkTheme ? '#2a1a1a' : '#fff5f5', borderRadius: '8px', color: '#ff4d4d'}}>
+                      <b>Твой ответ:</b><br/> {m.userAnswer || 'Пусто'}
+                    </div>
+                    <div style={{padding: '10px', background: isDarkTheme ? '#1a2a1a' : '#f5fff5', borderRadius: '8px', color: '#27ae60'}}>
+                      <b>Правильно:</b><br/> {m.task.correct_answer}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* БЛОК ОТ ИИ */}
+        <h3 style={{marginBottom: '15px', paddingLeft: '5px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+          🤖 Анализ нейросети
+        </h3>
+        <div className="ai-feedback-box" style={{
+          background: isDarkTheme ? '#1e1e1e' : '#f0f7ff',
+          padding: '20px',
+          borderRadius: '16px',
+          borderLeft: '4px solid #3aa1e9',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+        }}>
           {isAiLoading ? (
-            <div className="ai-loading" style={{color: '#888', fontStyle: 'italic'}}>🤖 Проверка результатов...</div>
+            <div className="ai-loading" style={{color: '#888', fontStyle: 'italic'}}>🤖 ИИ изучает твои ответы...</div>
           ) : aiFeedback ? (
-            <div className="ai-text" style={{lineHeight: '1.5'}} dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
+            <div className="ai-text" style={{lineHeight: '1.6'}} dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br/>') }} />
           ) : (
-            <div className="ai-text">Ошибок нет! Идеальная работа. 🏆</div>
+            <div className="ai-text" style={{textAlign: 'center', fontSize: '1.1rem'}}>Ошибок нет! Ты красавчик! 🏆🔥</div>
           )}
         </div>
+
         <button className="modern-btn lang-btn" onClick={() => {
             setLoading(true);
-            fetch(`${API_URL}/get_user_data?user_id=${userId}`).then(res => res.json()).then(data => { setUserData(data); setCurrentScreen('main'); setLoading(false); });
-          }} style={{marginTop: '30px'}}>Вернуться на главную</button>
+            fetch(`${API_URL}/get_user_data?user_id=${userId}`)
+              .then(res => res.json())
+              .then(data => {
+                setUserData(data);
+                setCurrentScreen('main');
+                setLoading(false);
+              });
+          }} style={{marginTop: '40px', marginBottom: '20px'}}>На главную</button>
       </div>
     );
   }
