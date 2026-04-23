@@ -10,6 +10,29 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
+  // --- ПЕРЕНЕСИ СЮДА (внутри App) ---
+  const [regData, setRegData] = useState({
+    real_name: '',
+    district: '',
+    city: '',
+    school: ''
+  });
+
+  const handleRegister = () => {
+    if (!regData.real_name || !regData.district || !regData.city || !regData.school) {
+      alert("Пожалуйста, заполни все поля!");
+      return;
+    }
+    setLoading(true);
+    fetch(`${API_URL}/update_profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, ...regData })
+    })
+    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
+    .then(res => res.json())
+    .then(data => { setUserData(data); setLoading(false); });
+  };
 
   // Опции
   const [useTimer, setUseTimer] = useState(true);
@@ -247,6 +270,43 @@ function App() {
     );
   }
 
+  // ЭКРАН РЕГИСТРАЦИИ (показывается, если данные не заполнены)
+  if (userData && !userData.real_name) {
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        <div className="modern-header">
+          <div className="modern-logo">🧬 Регистрация</div>
+          <p className="subtitle">Заполни данные, чтобы продолжить обучение</p>
+        </div>
+
+        <div className="answer-section" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+          <input
+            type="text" className="answer-input" placeholder="Твое имя и фамилия"
+            onChange={(e) => setRegData({...regData, real_name: e.target.value})}
+          />
+
+          <select className="answer-input" onChange={(e) => setRegData({...regData, district: e.target.value})}>
+            <option value="">Выбери район</option>
+            <option value="Бишкек">Бишкек (набросок)</option>
+            <option value="Ош">Ош (набросок)</option>
+            <option value="Чуй">Чуйская область (набросок)</option>
+          </select>
+
+          <input
+            type="text" className="answer-input" placeholder="Город / Поселок"
+            onChange={(e) => setRegData({...regData, city: e.target.value})}
+          />
+
+          <input
+            type="text" className="answer-input" placeholder="Номер школы"
+            onChange={(e) => setRegData({...regData, school: e.target.value})}
+          />
+
+          <button className="modern-btn lang-btn" onClick={handleRegister}>💾 Сохранить и начать</button>
+        </div>
+      </div>
+    );
+  }
   if (currentScreen === 'main') {
     const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
