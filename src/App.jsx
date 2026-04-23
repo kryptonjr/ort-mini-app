@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import schoolsData from './schools.json'; // 👈 ИМПОРТИРУЕМ НАШУ НОВУЮ БАЗУ ШКОЛ
 
 const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
@@ -12,12 +13,12 @@ function App() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
-  // --- ПЕРЕНЕСИ СЮДА (внутри App) ---
+  // Состояния для регистрации
   const [regData, setRegData] = useState({
     real_name: '',
-    district: '',
-    city: '',
-    school: ''
+    city: '',     // Область/Город
+    district: '', // Район
+    school: ''    // Школа
   });
 
   const handleRegister = () => {
@@ -46,7 +47,7 @@ function App() {
     .catch(err => {
       console.error("Критическая ошибка регистрации:", err);
       alert("Не удалось сохранить данные. Проверь соединение с сервером.");
-      setLoading(false); // ВЫКЛЮЧАЕМ спиннер, чтобы кнопка снова стала доступна
+      setLoading(false);
     });
   };
 
@@ -108,7 +109,6 @@ function App() {
     tg.expand();
 
     if (userId) {
-      // Загружаем данные пользователя И таблицу лидеров одновременно
       Promise.all([
         fetch(`${API_URL}/get_user_data?user_id=${userId}`).then(res => res.json()),
         fetch(`${API_URL}/get_leaderboard`).then(res => res.json())
@@ -242,20 +242,15 @@ function App() {
   // === ЛОГИКА ИКОНКИ ПРОФИЛЯ ===
   const getProfileIcon = () => {
     if (!userData) return '👤';
-
-    // 1. Проверяем медали (Топ-3)
     const rank = leaderboard.findIndex(u => u.id === userData.id);
-    if (rank === 0) return '🥇'; // 1 место
-    if (rank === 1) return '🥈'; // 2 место
-    if (rank === 2) return '🥉'; // 3 место
-
-    // 2. Проверяем роль
-    if (userData.role === 'admin') return '👨‍💻'; // Для тебя :3
-    if (userData.role === 'vip') return '👑';   // Для VIP
-
-    // 3. Обычный ученик по умолчанию
+    if (rank === 0) return '🥇';
+    if (rank === 1) return '🥈';
+    if (rank === 2) return '🥉';
+    if (userData.role === 'admin') return '👨‍💻';
+    if (userData.role === 'vip') return '👑';
     return '👤';
   };
+
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
   if (loading) {
@@ -275,59 +270,84 @@ function App() {
         <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>
           Телеграм не передал твой ID. Попробуй запустить бота с мобильного телефона или нажми /start.
         </p>
-        <div style={{marginTop: '20px', padding: '15px', background: '#111', color: '#0f0', borderRadius: '12px', fontSize: '0.85rem', width: '100%', wordBreak: 'break-all', textAlign: 'left', border: '1px solid #333'}}>
-          <b>⚙️ DEBUG INFO:</b><br/><br/>
-          <b>initDataUnsafe:</b> {JSON.stringify(tg.initDataUnsafe)}<br/><br/>
-          <b>version:</b> {tg.version || 'Не определена'}<br/>
-          <b>platform:</b> {tg.platform || 'Не определена'}<br/>
-          <b>fallback_id:</b> {fallbackId || 'Пусто'}
-        </div>
       </div>
     );
   }
 
-  // ЭКРАН РЕГИСТРАЦИИ (показывается, если данные не заполнены)
-  if (userData && !userData.real_name && false) {
+  // --- НОВЫЙ ЭКРАН РЕГИСТРАЦИИ (С УМНЫМИ СПИСКАМИ) ---
+  if (userData && !userData.real_name) {
+    // Вытягиваем данные из нашего JSON
+    const regions = Object.keys(schoolsData || {});
+    const districts = regData.city && schoolsData[regData.city] ? Object.keys(schoolsData[regData.city]) : [];
+    const schools = regData.district && schoolsData[regData.city]?.[regData.district] ? schoolsData[regData.city][regData.district] : [];
+
+    // Проверяем, всё ли заполнено, чтобы включить кнопку
+    const isFormValid = regData.real_name && regData.city && regData.district && regData.school;
+
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
         <div className="modern-header">
           <div className="modern-logo">🧬 Регистрация</div>
-          <p className="subtitle">Заполни данные, чтобы продолжить обучение</p>
+          <p className="subtitle">Выбери свою школу, чтобы продолжить обучение</p>
         </div>
 
         <div className="answer-section" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
           <input
-            type="text" className="answer-input" placeholder="Твое имя и фамилия"
+            type="text"
+            className="answer-input"
+            placeholder="Твои Имя и Фамилия"
+            value={regData.real_name}
             onChange={(e) => setRegData({...regData, real_name: e.target.value})}
           />
 
-          <select className="answer-input" onChange={(e) => setRegData({...regData, district: e.target.value})}>
-            <option value="">Выбери район</option>
-            <option value="Бишкек">Бишкек (набросок)</option>
-            <option value="Ош">Ош (набросок)</option>
-            <option value="Чуй">Чуйская область (набросок)</option>
+          <select
+            className="answer-input"
+            value={regData.city}
+            onChange={(e) => setRegData({...regData, city: e.target.value, district: '', school: ''})}
+          >
+            <option value="">Выберите Область / Город</option>
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
 
-          <input
-            type="text" className="answer-input" placeholder="Город / Поселок"
-            onChange={(e) => setRegData({...regData, city: e.target.value})}
-          />
+          <select
+            className="answer-input"
+            value={regData.district}
+            onChange={(e) => setRegData({...regData, district: e.target.value, school: ''})}
+            disabled={!regData.city}
+            style={{ opacity: !regData.city ? 0.5 : 1 }}
+          >
+            <option value="">Выберите Район</option>
+            {districts.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
 
-          <input
-            type="text" className="answer-input" placeholder="Номер школы"
+          <select
+            className="answer-input"
+            value={regData.school}
             onChange={(e) => setRegData({...regData, school: e.target.value})}
-          />
+            disabled={!regData.district}
+            style={{ opacity: !regData.district ? 0.5 : 1 }}
+          >
+            <option value="">Выберите Школу</option>
+            {schools.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
 
-          <button className="modern-btn lang-btn" onClick={handleRegister}>💾 Сохранить и начать</button>
+          <button
+            className="modern-btn lang-btn"
+            onClick={handleRegister}
+            disabled={!isFormValid}
+            style={{ opacity: isFormValid ? 1 : 0.5, marginTop: '10px' }}
+          >
+            💾 Сохранить и начать
+          </button>
         </div>
       </div>
     );
   }
+
   if (currentScreen === 'main') {
     const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-
         {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ */}
         {showPaymentModal && (
           <div className="modal-overlay">
@@ -336,15 +356,12 @@ function App() {
               <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
                 Отсканируй QR-код через приложение <b>MBank</b> или сохрани картинку и загрузи в банк.
               </p>
-
               <div className="qr-container">
                 <img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR MBank" className="qr-image" />
               </div>
-
               <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
                 После перевода обязательно нажми кнопку ниже, чтобы мы проверили платеж.
               </p>
-
               <div className="modal-buttons">
                 <button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button>
                 <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button>
@@ -367,7 +384,6 @@ function App() {
         </div>
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
-            {/* Вставляем нашу умную функцию сюда */}
             <div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p>
           </div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
@@ -402,9 +418,9 @@ function App() {
             </div>
           </div>
         </div>
+
         <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
 
-        {/* КНОПКА ПАНЕЛИ УПРАВЛЕНИЯ ЗДЕСЬ */}
         {userData?.role === 'admin' && (
           <button
             className="modern-btn"
@@ -412,10 +428,18 @@ function App() {
             onClick={() => {
               setLoading(true);
               fetch(`${API_URL}/get_all_users`)
-                .then(res => res.json())
+                .then(res => {
+                  if (!res.ok) throw new Error('Ошибка на сервере');
+                  return res.json();
+                })
                 .then(data => {
                   setAllUsers(data);
                   setCurrentScreen('admin_panel');
+                  setLoading(false);
+                })
+                .catch(err => {
+                  console.error(err);
+                  alert("Ошибка! Проверь запущен ли бот на сервере.");
                   setLoading(false);
                 });
             }}
@@ -437,7 +461,7 @@ function App() {
           <div className="modern-logo" style={{ marginBottom: '15px' }}>🧬 O.R.T. AI</div>
           <div className="profile-title"><span className="profile-avatar">{getProfileIcon()}</span><h2>Мой профиль</h2></div>
           <p className="profile-greeting">Привет, {userData?.first_name || 'Ученик'}!</p>
-          <p className="profile-meta">#ID: {userData?.id} | {userData?.role}</p>
+          <p className="profile-meta">#ID: {userData?.id} | Школа: {userData?.school || 'Не указана'}</p>
         </div>
         <div className="profile-stats-grid">
           <div className="stat-card-modern subj-blue"><div className="stat-icon-glass">🧮</div><div className="stat-text"><span className="stat-label">Алгебра</span><span className="stat-score">{userData?.scores?.algebra || 0} pts</span></div></div>
@@ -578,7 +602,6 @@ function App() {
         </div>
 
         <div className="answer-section">
-          {/* НОВЫЕ БЫСТРЫЕ КНОПКИ А, Б, В, Г */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
             {['А', 'Б', 'В', 'Г'].map(opt => {
               const isSelected = answerInput.trim().toUpperCase() === opt;
@@ -619,7 +642,6 @@ function App() {
   }
 
   if (currentScreen === 'result') {
-    // Фильтруем только те ответы, где ученик ошибся
     const mistakes = userAnswers.filter(ans => !ans.isCorrect);
 
     return (
@@ -631,32 +653,27 @@ function App() {
           <h1 style={{fontSize: '3.5rem', margin: 0, color: '#111'}}>{correctCount} / {tasks.length}</h1>
         </div>
 
-        {/* СПИСОК ОШИБОК (если они есть) */}
         {mistakes.length > 0 && (
           <div className="mistakes-section" style={{marginBottom: '30px'}}>
             <h3 style={{marginBottom: '15px', paddingLeft: '5px', display: 'flex', alignItems: 'center', gap: '10px'}}>
               ❌ Разбор ошибок ({mistakes.length})
             </h3>
-
             {mistakes.map((m, idx) => {
               const taskImages = m.task.image_url ? m.task.image_url.split(/[\s,]+/).filter(url => url.trim() !== "") : [];
               return (
                 <div key={idx} className="task-content" style={{
                   background: isDarkTheme ? '#1e1e1e' : 'white',
-                  border: '1px solid #ff4d4d', // Подсвечиваем рамку красным
+                  border: '1px solid #ff4d4d',
                   marginBottom: '15px',
                   padding: '15px'
                 }}>
                   <p style={{fontSize: '0.8rem', color: '#888', marginBottom: '10px', fontWeight: 'bold'}}>ЗАДАНИЕ №{userAnswers.indexOf(m) + 1}</p>
-
                   {taskImages.length > 0 && (
                     <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px'}}>
                       {taskImages.map((url, i) => <img key={i} src={url} alt="Задание" style={{width: '100%', borderRadius: '8px', border: '1px solid #eee'}} />)}
                     </div>
                   )}
-
                   <p style={{marginBottom: '15px', lineHeight: '1.4'}}>{m.task.question}</p>
-
                   <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem'}}>
                     <div style={{padding: '10px', background: isDarkTheme ? '#2a1a1a' : '#fff5f5', borderRadius: '8px', color: '#ff4d4d'}}>
                       <b>Твой ответ:</b><br/> {m.userAnswer || 'Пусто'}
@@ -671,7 +688,6 @@ function App() {
           </div>
         )}
 
-        {/* БЛОК ОТ ИИ */}
         <h3 style={{marginBottom: '15px', paddingLeft: '5px', display: 'flex', alignItems: 'center', gap: '10px'}}>
           🤖 Анализ нейросети
         </h3>
@@ -705,7 +721,6 @@ function App() {
     );
   }
 
-  // --- ЭКРАН ПАНЕЛИ УПРАВЛЕНИЯ ---
   if (currentScreen === 'admin_panel') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
@@ -713,14 +728,13 @@ function App() {
           <h2>👑 Админ-панель</h2>
           <p className="subtitle">Всего учеников: {allUsers.length}</p>
         </div>
-
         <div style={{overflowX: 'auto', marginBottom: '20px'}}>
           <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left'}}>
             <thead>
               <tr style={{borderBottom: `2px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
                 <th style={{padding: '10px'}}>ID / Имя</th>
                 <th style={{padding: '10px'}}>Статус</th>
-                <th style={{padding: '10px'}}>Город / Школа</th>
+                <th style={{padding: '10px'}}>Школа</th>
               </tr>
             </thead>
             <tbody>
@@ -740,15 +754,14 @@ function App() {
                     </span>
                   </td>
                   <td style={{padding: '10px', color: '#888'}}>
-                    {user.city || '—'}<br/>
-                    {user.school ? `Школа №${user.school}` : '—'}
+                    {user.district || '—'}<br/>
+                    {user.school ? `${user.school}` : '—'}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
         <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
