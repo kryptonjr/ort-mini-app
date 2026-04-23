@@ -267,7 +267,7 @@ function App() {
             <div className="dash-icon">👤</div><h4>Профиль</h4><p>{totalScore} баллов</p>
           </div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
-            <div className="dash-icon">🆘</div><h4>Пмощь</h4><p>Инструкции</p>
+            <div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p>
           </div>
           <div className="dash-card leader-card" onClick={() => {
             setLoading(true);
@@ -366,7 +366,7 @@ function App() {
     return (
       <div className={`app-container modern-ui help-modern ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
-          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <div className="modern-logo">🧪 O.R.T. AI</div>
           <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>🆘 Помощь</h2>
         </div>
         <div className="modern-dashboard-grid help-cards-grid">
