@@ -508,79 +508,41 @@ select.answer-input {
   margin-bottom: 0; /* Убираем лишний отступ в модалке */
 }
 /* =========================================
-   АНИМАЦИЯ И СКРОЛЛ ДЛЯ БАЛЛОВ (КАРУСЕЛЬ)
+   ФИНАЛЬНЫЙ ФИКС КАРУСЕЛИ БАЛЛОВ
    ========================================= */
-
-
-/* Делаем строку прокручиваемой */
-.scores-row.scrollable-row {
-  display: flex;
-  justify-content: flex-start; /* Убираем space-between */
-  gap: 20px; /* Расстояние между ачивками */
-  overflow-x: auto; /* Включаем горизонтальный скролл */
-  scroll-snap-type: x mandatory; /* Включаем "магниты" при свайпе */
-  padding-bottom: 15px; /* Место под ползунок */
-  -webkit-overflow-scrolling: touch; /* Плавный скролл на iPhone */
-
-  /* Прячем стандартный скроллбар в Firefox/IE */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,0.1) transparent;
-}
-
-/* Настраиваем красоту скроллбара для Chrome/Safari/Telegram */
-.scores-row.scrollable-row::-webkit-scrollbar {
-  height: 6px;
-}
-.scores-row.scrollable-row::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scores-row.scrollable-row::-webkit-scrollbar-thumb {
-  background-color: #ddd;
-  border-radius: 10px;
-}
-.dark-theme .scores-row.scrollable-row::-webkit-scrollbar-thumb {
-  background-color: #444;
-}
-
-/* Настройка самих карточек внутри карусели */
-.score-col.score-snap {
-  flex: 0 0 30%; /* Карточка занимает 30% ширины экрана, чтобы остальные выглядывали сбоку */
-  min-width: 90px; /* Минимальная ширина, чтобы не сплющивались */
-  scroll-snap-align: start; /* Карточка "примагничивается" к левому краю */
-  transition: transform 0.2s ease;
-}
-
-/* Легкая анимация при нажатии на карточку достижения */
 
 .scores-row.scrollable-row {
   display: flex !important;
+  flex-wrap: nowrap !important; /* Запрещаем перенос на новую строку */
   justify-content: flex-start !important;
   gap: 15px !important;
-  overflow-x: auto !important;
+  overflow-x: scroll !important; /* Принудительный скролл */
   scroll-snap-type: x mandatory;
-  padding-bottom: 10px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Прячем полосу прокрутки для красоты */
+  padding: 10px 5px 20px 5px;
+  -webkit-overflow-scrolling: touch; /* Плавность для iOS */
 }
 
-/* Прячем стандартный скроллбар в Chrome/Safari/Telegram */
+/* Скрываем полосу прокрутки для чистоты дизайна */
 .scores-row.scrollable-row::-webkit-scrollbar {
   display: none;
 }
 
 .score-col.score-snap {
-  /* Делаем карточки больше (40% экрана), чтобы они выходили за края */
-  flex: 0 0 40% !important;
-  min-width: 110px !important;
-  scroll-snap-align: center !important; /* Центрируем при свайпе */
-  transition: transform 0.2s ease;
-  background: rgba(0,0,0,0.02); /* Легкий фон для выделения карточки */
-  padding: 10px;
-  border-radius: 12px;
+  /* Каждая карточка занимает 45% ширины — так две не влезут целиком, и скролл появится 100% */
+  flex: 0 0 45% !important;
+  min-width: 140px !important;
+  scroll-snap-align: center;
+  background: rgba(136, 136, 136, 0.05);
+  border-radius: 16px;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
 .dark-theme .score-col.score-snap {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .score-col.score-snap:active {
