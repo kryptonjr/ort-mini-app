@@ -285,7 +285,10 @@ function App() {
   }
 
   // ЭКРАН РЕГИСТРАЦИИ (показывается, если данные не заполнены)
-  if (userData && !userData.real_name) {
+  // Мы просто добавили false, чтобы этот экран никогда не включался сам по себе
+  if (userData && !userData.real_name && false) {
+    ...
+  }
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
         <div className="modern-header">
