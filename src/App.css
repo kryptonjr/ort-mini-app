@@ -209,7 +209,44 @@ body {
   text-align: center;
 }
 
-.vip-btn { background: linear-gradient(135deg, #f5f7fa, #e4e8f0); color: #333; }
+/* =========================================
+   АНИМИРОВАННАЯ КНОПКА VIP
+   ========================================= */
+.vip-btn {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); /* Золотой градиент */
+  color: #111 !important;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  font-weight: 900;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+  animation: vipPulse 2s infinite; /* Пульсация */
+}
+
+/* Эффект дыхания (увеличение и свечение) */
+@keyframes vipPulse {
+  0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 4px 25px rgba(255, 165, 0, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
+}
+
+/* Блик, пробегающий по кнопке */
+.vip-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: vipShine 3s infinite; /* Блик каждые 3 секунды */
+}
+
+@keyframes vipShine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
 .exit-btn { background: white; color: #e74c3c; border: 1px solid #ffeaea; }
 .lang-btn { background: linear-gradient(135deg, #2f80ed, #1565c0); color: white; box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3); }
 .back-btn-outline { background: white; color: #111; border: 2px solid #a44040; box-shadow: none; }
