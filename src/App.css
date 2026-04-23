@@ -511,6 +511,7 @@ select.answer-input {
    АНИМАЦИЯ И СКРОЛЛ ДЛЯ БАЛЛОВ (КАРУСЕЛЬ)
    ========================================= */
 
+
 /* Делаем строку прокручиваемой */
 .scores-row.scrollable-row {
   display: flex;
@@ -550,6 +551,39 @@ select.answer-input {
 }
 
 /* Легкая анимация при нажатии на карточку достижения */
+
+.scores-row.scrollable-row {
+  display: flex !important;
+  justify-content: flex-start !important;
+  gap: 15px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Прячем полосу прокрутки для красоты */
+}
+
+/* Прячем стандартный скроллбар в Chrome/Safari/Telegram */
+.scores-row.scrollable-row::-webkit-scrollbar {
+  display: none;
+}
+
+.score-col.score-snap {
+  /* Делаем карточки больше (40% экрана), чтобы они выходили за края */
+  flex: 0 0 40% !important;
+  min-width: 110px !important;
+  scroll-snap-align: center !important; /* Центрируем при свайпе */
+  transition: transform 0.2s ease;
+  background: rgba(0,0,0,0.02); /* Легкий фон для выделения карточки */
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.dark-theme .score-col.score-snap {
+  background: rgba(255,255,255,0.03);
+}
+
 .score-col.score-snap:active {
   transform: scale(0.95);
+}
 }
