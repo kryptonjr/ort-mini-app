@@ -470,6 +470,7 @@ function App() {
           <span style={{fontWeight: 'bold', color: '#888'}}>{selectedSubject} ({currentTaskIdx + 1}/{tasks.length})</span>
           <span style={{ fontWeight: 'bold', color: (useTimer && timeLeft < 60) ? '#e74c3c' : (isDarkTheme ? '#fff' : '#333') }}>{useTimer ? `⏱ ${timeString}` : '🧘 Без ограничений'}</span>
         </div>
+
         <div className="task-content" style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'}}>
           {images.length > 0 && (
             <div className="task-images-container" style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px'}}>
@@ -478,6 +479,7 @@ function App() {
           )}
           <p className="task-text" style={{lineHeight: '1.5', whiteSpace: 'pre-wrap', margin: 0}}>{currentTask.question}</p>
         </div>
+
         <div className="answer-section">
           {/* НОВЫЕ БЫСТРЫЕ КНОПКИ А, Б, В, Г */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
@@ -502,11 +504,10 @@ function App() {
             })}
           </div>
 
-          {/* СТАРОЕ ПОЛЕ ВВОДА (оставляем для чисел/своих ответов) */}
           <input
             type="text"
             className="answer-input"
-            placeholder="Или введи свой ответ (число/слово)..."
+            placeholder="Или введи свой ответ..."
             value={answerInput}
             onChange={(e) => setAnswerInput(e.target.value)}
             style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}
@@ -516,6 +517,7 @@ function App() {
             {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
           </button>
         </div>
+      </div>
     );
   }
 
