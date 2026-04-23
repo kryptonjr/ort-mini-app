@@ -69,10 +69,20 @@ function App() {
     tg.expand();
 
     if (userId) {
-      fetch(`${API_URL}/get_user_data?user_id=${userId}`)
-        .then(res => res.json())
-        .then(data => { setUserData(data); setLoading(false); })
-        .catch(err => { console.error("Ошибка:", err); setLoading(false); });
+      // Загружаем данные пользователя И таблицу лидеров одновременно
+      Promise.all([
+        fetch(`${API_URL}/get_user_data?user_id=${userId}`).then(res => res.json()),
+        fetch(`${API_URL}/get_leaderboard`).then(res => res.json())
+      ])
+      .then(([userDataRes, leaderboardRes]) => {
+        setUserData(userDataRes);
+        setLeaderboard(leaderboardRes);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Ошибка:", err);
+        setLoading(false);
+      });
     } else {
       setLoading(false);
     }
@@ -190,6 +200,23 @@ function App() {
     .then(data => { setUserData(data); setLoading(false); });
   };
 
+  // === ЛОГИКА ИКОНКИ ПРОФИЛЯ ===
+  const getProfileIcon = () => {
+    if (!userData) return '👤';
+
+    // 1. Проверяем медали (Топ-3)
+    const rank = leaderboard.findIndex(u => u.id === userData.id);
+    if (rank === 0) return '🥇'; // 1 место
+    if (rank === 1) return '🥈'; // 2 место
+    if (rank === 2) return '🥉'; // 3 место
+
+    // 2. Проверяем роль
+    if (userData.role === 'admin') return '👨‍💻'; // Для тебя :3
+    if (userData.role === 'vip') return '👑';   // Для VIP
+
+    // 3. Обычный ученик по умолчанию
+    return '👤';
+  };
   // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
   if (loading) {
@@ -264,7 +291,8 @@ function App() {
         </div>
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
-            <div className="dash-icon">👤</div><h4>Профиль</h4><p>{totalScore} баллов</p>
+            {/* Вставляем нашу умную функцию сюда */}
+            <div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p>
           </div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
             <div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p>
@@ -310,7 +338,7 @@ function App() {
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-profile-header">
           <div className="modern-logo" style={{ marginBottom: '15px' }}>🧬 O.R.T. AI</div>
-          <div className="profile-title"><span className="profile-avatar">👨‍🎓</span><h2>Мой профиль</h2></div>
+          <div className="profile-title"><span className="profile-avatar">{getProfileIcon()}</span><h2>Мой профиль</h2></div>
           <p className="profile-greeting">Привет, {userData?.first_name || 'Ученик'}!</p>
           <p className="profile-meta">#ID: {userData?.id} | {userData?.role}</p>
         </div>
