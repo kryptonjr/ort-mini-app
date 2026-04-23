@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 const tg = window.Telegram.WebApp;
-const API_URL = "https://ort-bot.ru";
+const API_URL = "https://ort-bot.ru:8082";
 
 function App() {
   // === ОСНОВНЫЕ СОСТОЯНИЯ ===
@@ -23,15 +23,29 @@ function App() {
       alert("Пожалуйста, заполни все поля!");
       return;
     }
+
     setLoading(true);
+
     fetch(`${API_URL}/update_profile`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId, ...regData })
     })
+    .then(res => {
+      if (!res.ok) throw new Error('Ошибка сервера');
+      return res.json();
+    })
     .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
     .then(res => res.json())
-    .then(data => { setUserData(data); setLoading(false); });
+    .then(data => {
+      setUserData(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Критическая ошибка регистрации:", err);
+      alert("Не удалось сохранить данные. Проверь соединение с сервером.");
+      setLoading(false); // ВЫКЛЮЧАЕМ спиннер, чтобы кнопка снова стала доступна
+    });
   };
 
   // Опции
