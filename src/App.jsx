@@ -366,7 +366,7 @@ function App() {
     return (
       <div className={`app-container modern-ui help-modern ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
-          <div className="modern-logo">🧪 O.R.T. AI</div>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
           <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>🆘 Помощь</h2>
         </div>
         <div className="modern-dashboard-grid help-cards-grid">
