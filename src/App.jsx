@@ -479,12 +479,43 @@ function App() {
           <p className="task-text" style={{lineHeight: '1.5', whiteSpace: 'pre-wrap', margin: 0}}>{currentTask.question}</p>
         </div>
         <div className="answer-section">
-          <input type="text" className="answer-input" placeholder="Введи ответ (А, Б, В... или число)" value={answerInput} onChange={(e) => setAnswerInput(e.target.value)} style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}/>
+          {/* НОВЫЕ БЫСТРЫЕ КНОПКИ А, Б, В, Г */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+            {['А', 'Б', 'В', 'Г'].map(opt => {
+              const isSelected = answerInput.trim().toUpperCase() === opt;
+              return (
+                <button
+                  key={opt}
+                  onClick={() => setAnswerInput(opt)}
+                  style={{
+                    flex: 1, padding: '15px 0', borderRadius: '12px', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    background: isSelected ? '#3aa1e9' : (isDarkTheme ? '#2c2c2c' : '#f4f7fb'),
+                    color: isSelected ? 'white' : (isDarkTheme ? 'white' : '#111'),
+                    border: `2px solid ${isSelected ? '#3aa1e9' : (isDarkTheme ? '#444' : '#edf2f7')}`,
+                    boxShadow: isSelected ? '0 4px 12px rgba(58, 161, 233, 0.3)' : 'none'
+                  }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* СТАРОЕ ПОЛЕ ВВОДА (оставляем для чисел/своих ответов) */}
+          <input
+            type="text"
+            className="answer-input"
+            placeholder="Или введи свой ответ (число/слово)..."
+            value={answerInput}
+            onChange={(e) => setAnswerInput(e.target.value)}
+            style={{width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid', borderColor: isDarkTheme ? '#444' : '#edf2f7', background: isDarkTheme ? '#2c2c2c' : 'white', color: isDarkTheme ? 'white' : 'black', marginBottom: '15px', fontSize: '1.1rem'}}
+          />
+
           <button className="modern-btn lang-btn" onClick={handleNextTask} disabled={!answerInput.trim()} style={{opacity: answerInput.trim() ? 1 : 0.5}}>
             {currentTaskIdx + 1 === tasks.length ? "Завершить тест" : "Дальше ➡"}
           </button>
         </div>
-      </div>
     );
   }
 
