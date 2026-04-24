@@ -456,15 +456,6 @@ function App() {
       </div>
     );
   }
-        <div className="buttons-column">
-          <button className="modern-btn vip-btn" onClick={() => handleStartTest(5)}>5 задач</button>
-          <button className="modern-btn vip-btn" onClick={() => handleStartTest(10)}>10 задач</button>
-          <button className="modern-btn vip-btn" onClick={() => handleStartTest(15)}>15 задач</button>
-          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
-        </div>
-      </div>
-    );
-  }
 
   // Экран Решения
   if (currentScreen === 'solving') {
