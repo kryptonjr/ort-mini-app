@@ -512,47 +512,44 @@ select.answer-input {
    ========================================= */
 
 .scores-row.scrollable-row {
+  display: flex !important;/* =========================================
+   ФИНАЛЬНЫЙ ФИКС КАРУСЕЛИ БАЛЛОВ
+   ========================================= */
+.scores-row.scrollable-row {
   display: flex !important;
-  flex-wrap: nowrap !important; /* Запрещаем перенос на новую строку */
+  flex-wrap: nowrap !important;
   justify-content: flex-start !important;
   gap: 15px !important;
-  overflow-x: scroll !important; /* Принудительный скролл */
+  overflow-x: auto !important;
   scroll-snap-type: x mandatory;
-  padding: 10px 5px 20px 5px;
-  -webkit-overflow-scrolling: touch; /* Плавность для iOS */
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 
-/* Скрываем полосу прокрутки для чистоты дизайна */
 .scores-row.scrollable-row::-webkit-scrollbar {
   display: none;
 }
 
 .score-col.score-snap {
-  /* Каждая карточка занимает 45% ширины — так две не влезут целиком, и скролл появится 100% */
-  flex: 0 0 45% !important;
-  min-width: 140px !important;
-  scroll-snap-align: center;
+  flex: 0 0 45% !important; /* Ровно 45% экрана, чтобы остальные обрезались и был скролл */
+  min-width: 130px !important;
+  scroll-snap-align: start;
   background: rgba(136, 136, 136, 0.05);
   border-radius: 16px;
   padding: 15px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
 .dark-theme .score-col.score-snap {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.score-col.score-snap:active {
-  transform: scale(0.95);
-}
 /* =========================================
    UI ДЛЯ СОРЕВНОВАНИЙ И ЛИДЕРБОРДА
    ========================================= */
-
-/* Переключатель вкладок */
 .leaderboard-tabs {
   display: flex;
   background: rgba(0, 0, 0, 0.05);
@@ -560,103 +557,28 @@ select.answer-input {
   padding: 4px;
   margin-bottom: 20px;
 }
-.dark-theme .leaderboard-tabs {
-  background: rgba(255, 255, 255, 0.05);
-}
+.dark-theme .leaderboard-tabs { background: rgba(255, 255, 255, 0.05); }
 
 .tab-btn {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  background: transparent;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: bold;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  flex: 1; padding: 12px; border: none; background: transparent;
+  border-radius: 12px; font-size: 0.95rem; font-weight: bold; color: #666; transition: all 0.3s ease;
 }
-.dark-theme .tab-btn {
-  color: #aaa;
-}
+.dark-theme .tab-btn { color: #aaa; }
 
-.tab-btn.active-tab {
-  background: white;
-  color: #111;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-.dark-theme .tab-btn.active-tab {
-  background: #2c2c2c;
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+.tab-btn.active-tab { background: white; color: #111; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+.dark-theme .tab-btn.active-tab { background: #2c2c2c; color: #fff; }
 
-/* Списки рейтинга */
-.ranking-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.ranking-list { display: flex; flex-direction: column; gap: 10px; }
+.ranking-item { display: flex; align-items: center; background: white; padding: 15px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+.dark-theme .ranking-item { background: #1e1e1e; border: 1px solid #333; }
 
-.ranking-item {
-  display: flex;
-  align-items: center;
-  background: white;
-  padding: 15px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  transition: transform 0.2s;
-}
-.dark-theme .ranking-item {
-  background: #1e1e1e;
-  border: 1px solid #333;
-}
+.rank-position { width: 40px; font-size: 1.5rem; text-align: center; font-weight: 900; }
+.rank-number { font-size: 1.1rem; color: #888; }
+.rank-info { flex: 1; display: flex; flex-direction: column; padding-left: 10px; }
+.rank-info b { font-size: 1rem; color: #111; }
+.dark-theme .rank-info b { color: #fff; }
+.rank-score { font-size: 1.2rem; font-weight: 900; color: #3aa1e9; text-align: right; }
 
-.ranking-item:active {
-  transform: scale(0.98);
-}
-
-.rank-position {
-  width: 40px;
-  font-size: 1.5rem;
-  text-align: center;
-  font-weight: 900;
-}
-.rank-number {
-  font-size: 1.1rem;
-  color: #888;
-}
-
-.rank-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-left: 10px;
-}
-.rank-info b {
-  font-size: 1rem;
-  color: #111;
-}
-.dark-theme .rank-info b {
-  color: #fff;
-}
-
-.rank-score {
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: #3aa1e9;
-  text-align: right;
-}
-
-/* Специфичные стили для школ */
-.school-item {
-  border-left: 4px solid #3aa1e9;
-}
-.school-district {
-  font-size: 0.75rem;
-  color: #888;
-  margin-top: 4px;
-}
-.school-score {
-  color: #f39c12; /* Золотой цвет для баллов школы */
-}
+.school-item { border-left: 4px solid #3aa1e9; }
+.school-district { font-size: 0.75rem; color: #888; margin-top: 4px; }
+.school-score { color: #f39c12; }
