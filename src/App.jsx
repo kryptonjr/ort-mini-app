@@ -11,6 +11,7 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardTab, setLeaderboardTab] = useState('personal'); // 'personal' или 'schools'
   const [allUsers, setAllUsers] = useState([]);
 
   // Регистрация
@@ -238,16 +239,22 @@ function App() {
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}><div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p></div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}><div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p></div>
-          <div className="dash-card leader-card" onClick={() => { setLoading(true); fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => { setLeaderboard(data); setCurrentScreen('leaderboard'); setLoading(false); }); }}><div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p></div>
-        </div>
-        <div className="scores-section">
-          <h3 className="section-title">Мои Баллы</h3>
-          <div className="scores-row scrollable-row">
-            <div className="score-col score-snap"><div className="score-icon">🧮</div><span className="score-label">Math</span><div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div><span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span></div>
-            <div className="score-col score-snap"><div className="score-icon">📜</div><span className="score-label">Grammar</span><div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div><span className="score-val">{userData?.scores?.grammar || 0} pts</span></div>
-            <div className="score-col score-snap"><div className="score-icon">👁️</div><span className="score-label">Reading</span><div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div><span className="score-val">{userData?.scores?.reading || 0} pts</span></div>
-            <div className="score-col score-snap"><div className="score-icon">🔗</div><span className="score-label">Analogies</span><div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.analogies || 0) * 5, 100)}%`, background: '#9b59b6'}}></div></div><span className="score-val">{userData?.scores?.analogies || 0} pts</span></div>
-            <div className="score-col score-snap"><div className="score-icon">📝</div><span className="score-label">Sentences</span><div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.sentences || 0) * 5, 100)}%`, background: '#f39c12'}}></div></div><span className="score-val">{userData?.scores?.sentences || 0} pts</span></div>
+         <div className="dash-card leader-card" onClick={() => {
+            setLoading(true);
+            Promise.all([
+              fetch(`${API_URL}/get_leaderboard`).then(res => res.json()),
+              fetch(`${API_URL}/get_school_leaderboard`).then(res => res.json())
+            ]).then(([usersData, schoolsData]) => {
+              setLeaderboard(usersData);
+              setSchoolLeaderboard(schoolsData);
+              setCurrentScreen('leaderboard');
+              setLoading(false);
+            }).catch(err => {
+              console.error(err);
+              setLoading(false);
+            });
+          }}>
+            <div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p>
           </div>
         </div>
         <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
@@ -386,18 +393,68 @@ function App() {
     const medals = ['🥇', '🥈', '🥉'];
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🏆 ТОП-10 УЧЕНИКОВ</h2>
-        <div className="profile-card-real" style={{padding: '10px 20px', borderRadius: '16px'}}>
-          {leaderboard.length === 0 ? (
-            <p style={{textAlign: 'center'}}>Пока нет данных.</p>
-          ) : (
-            leaderboard.map((user, idx) => (
-              <div key={user.id} style={{display: 'flex', justifyContent: 'space-between', padding: '15px 0', borderBottom: '1px solid #eee'}}>
-                <span>{idx < 3 ? medals[idx] : <span style={{opacity: 0.5}}>{idx + 1}.</span>}<b style={{marginLeft: '10px'}}>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b></span>
-                <span style={{color: '#3aa1e9', fontWeight: 'bold'}}>{user.total_score} б.</span>
-              </div>
-            ))
+        <div className="modern-header" style={{ marginBottom: '20px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>🏆 Зал Славы</h2>
+          <p className="subtitle">Соревнуйся и поднимай свою школу в ТОП!</p>
+        </div>
+
+        {/* ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК */}
+        <div className="leaderboard-tabs">
+          <button
+            className={`tab-btn ${leaderboardTab === 'personal' ? 'active-tab' : ''}`}
+            onClick={() => setLeaderboardTab('personal')}
+          >
+            👤 Ученики
+          </button>
+          <button
+            className={`tab-btn ${leaderboardTab === 'schools' ? 'active-tab' : ''}`}
+            onClick={() => setLeaderboardTab('schools')}
+          >
+            🏫 Школы
+          </button>
+        </div>
+
+        <div className="profile-card-real" style={{ padding: '10px', borderRadius: '16px', background: 'transparent', boxShadow: 'none' }}>
+
+          {/* ВКЛАДКА: ЛИЧНЫЙ РЕЙТИНГ */}
+          {leaderboardTab === 'personal' && (
+            <div className="ranking-list">
+              {leaderboard.length === 0 ? (
+                <p style={{textAlign: 'center', color: '#888'}}>Пока нет данных.</p>
+              ) : (
+                leaderboard.map((user, idx) => (
+                  <div key={user.id} className="ranking-item">
+                    <div className="rank-position">{idx < 3 ? medals[idx] : <span className="rank-number">{idx + 1}</span>}</div>
+                    <div className="rank-info">
+                      <b>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
+                    </div>
+                    <div className="rank-score">{user.total_score} <span style={{fontSize:'0.7rem'}}>pts</span></div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
+
+          {/* ВКЛАДКА: РЕЙТИНГ ШКОЛ */}
+          {leaderboardTab === 'schools' && (
+            <div className="ranking-list">
+              {schoolLeaderboard.length === 0 ? (
+                <p style={{textAlign: 'center', color: '#888'}}>Школы пока не набрали баллов.</p>
+              ) : (
+                schoolLeaderboard.map((school, idx) => (
+                  <div key={idx} className="ranking-item school-item">
+                    <div className="rank-position">{idx < 3 ? medals[idx] : <span className="rank-number">{idx + 1}</span>}</div>
+                    <div className="rank-info">
+                      <b>{school.school}</b>
+                      <span className="school-district">📍 {school.district} • 👥 Учеников: {school.students_count}</span>
+                    </div>
+                    <div className="rank-score school-score">{school.total_school_score} <span style={{fontSize:'0.7rem'}}>pts</span></div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
         </div>
         <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
