@@ -65,7 +65,7 @@ body {
   font-size: 1.5rem;
   margin-bottom: 20px;
   text-align: center;
-  color: #111; /* Явно задаем черный цвет для светлой темы */
+  color: #111;
   font-weight: 800;
 }
 
@@ -213,26 +213,7 @@ body {
    АНИМИРОВАННАЯ КНОПКА VIP
    ========================================= */
 .vip-btn {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); /* Золотой градиент */
-  color: #111 !important;
-  position: relative;
-  overflow: hidden;
-  border: none;
-  font-weight: 900;
-  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
-  animation: vipPulse 2s infinite; /* Пульсация */
-}
-
-/* Эффект дыхания (увеличение и свечение) */
-@keyframes vipPulse {
-  0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
-  50% { transform: scale(1.02); box-shadow: 0 4px 25px rgba(255, 165, 0, 0.7); }
-  100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
-}
-
-/* Кнопка покупки на главном экране — ОСТАЕТСЯ ЗОЛОТОЙ */
-.vip-premium-card {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   color: #111 !important;
   position: relative;
   overflow: hidden;
@@ -242,18 +223,21 @@ body {
   animation: vipPulse 2s infinite;
 }
 
-/* Обычные кнопки в меню (возвращаем старый вид) */
-.vip-btn {
-  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
-  color: #333;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+@keyframes vipPulse {
+  0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 4px 25px rgba(255, 165, 0, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
 }
 
-/* Анимации оставляем, они пригодятся для премиум-карты */
-@keyframes vipPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
+.vip-premium-card {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+  color: #111 !important;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  font-weight: 900;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+  animation: vipPulse 2s infinite;
 }
 
 .vip-premium-card::after {
@@ -365,16 +349,14 @@ select.answer-input {
 }
 
 /* =========================================
-   ТЕМНАЯ ТЕМА (DARK MODE) - ФИНАЛЬНЫЙ ФИКС
+   ТЕМНАЯ ТЕМА (DARK MODE)
    ========================================= */
 
-/* 1. Общий фон и цвет текста по умолчанию */
 .dark-theme.app-container {
   background: #121212 !important;
   color: #ffffff !important;
 }
 
-/* 2. Заголовки, логотипы и основной текст на черном фоне -> БЕЛЫЕ */
 .dark-theme .modern-logo,
 .dark-theme .modern-header h2,
 .dark-theme .modern-profile-header h2,
@@ -389,7 +371,6 @@ select.answer-input {
   color: #ffffff !important;
 }
 
-/* 3. Подзаголовки и мета-информация -> СВЕТЛО-СЕРЫЕ */
 .dark-theme .subtitle,
 .dark-theme .profile-meta,
 .dark-theme .score-val,
@@ -398,13 +379,11 @@ select.answer-input {
   color: #bbbbbb !important;
 }
 
-/* 4. ЦВЕТНЫЕ КАРТОЧКИ (Предметы, Статистика, Помощь) */
 .dark-theme .stat-card-modern,
 .dark-theme .subject-card-modern {
   box-shadow: 0 4px 15px rgba(0,0,0,0.8) !important;
 }
 
-/* ТЕКСТ ВНУТРИ ЦВЕТНЫХ КАРТОЧЕК -> ТЕМНЫЙ (чтобы читался на пастельном фоне) */
 .dark-theme .stat-card-modern:not(.vip-support-btn) .stat-label,
 .dark-theme .stat-card-modern:not(.vip-support-btn) .stat-score,
 .dark-theme .stat-card-modern:not(.vip-support-btn) .help-title-modern,
@@ -413,7 +392,6 @@ select.answer-input {
   color: #111111 !important;
 }
 
-/* 5. БЫВШИЕ "БЕЛЫЕ" ПЛАШКИ (Задачи, Лидерборд, Инпуты) -> ТЕМНО-СЕРЫЕ */
 .dark-theme .vip-support-btn,
 .dark-theme .task-content,
 .dark-theme .answer-section,
@@ -425,20 +403,17 @@ select.answer-input {
   color: #ffffff !important;
 }
 
-/* Текст внутри карточки Поддержки (она теперь черная) -> белый */
 .dark-theme .vip-support-btn .help-title-modern,
 .dark-theme .vip-support-btn .help-subtitle {
    color: #ffffff !important;
 }
 
-/* Лидерборд (внутри белые тексты) */
 .dark-theme .profile-card-real b,
 .dark-theme .profile-card-real span,
 .dark-theme .profile-card-real p {
   color: #ffffff !important;
 }
 
-/* 6. ИНПУТЫ И КНОПКИ */
 .dark-theme .answer-input {
   background: #2c2c2c !important;
   color: #ffffff !important;
@@ -453,7 +428,7 @@ select.answer-input {
 }
 
 /* =========================================
-   МОДАЛЬНОЕ ОКНО ОПЛАТЫ (МАТОВЫЙ ЧЕРНЫЙ)
+   МОДАЛЬНОЕ ОКНО ОПЛАТЫ
    ========================================= */
 .modal-overlay {
   position: fixed;
@@ -461,7 +436,7 @@ select.answer-input {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85); /* Затемнение фона */
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   display: flex;
@@ -472,9 +447,9 @@ select.answer-input {
 }
 
 .modal-content.geometric-dark {
-  background: #111111; /* Глубокий матовый черный */
+  background: #111111;
   border: 1px solid #333;
-  border-radius: 12px; /* Чуть более строгая геометрия */
+  border-radius: 12px;
   padding: 30px 20px;
   width: 100%;
   max-width: 400px;
@@ -484,7 +459,7 @@ select.answer-input {
 }
 
 .qr-container {
-  background: #ffffff; /* Белый фон под QR для контраста */
+  background: #ffffff;
   padding: 15px;
   border-radius: 8px;
   display: inline-block;
@@ -505,14 +480,10 @@ select.answer-input {
 }
 
 .modal-buttons .modern-btn {
-  margin-bottom: 0; /* Убираем лишний отступ в модалке */
+  margin-bottom: 0;
 }
-/* =========================================
-   ФИНАЛЬНЫЙ ФИКС КАРУСЕЛИ БАЛЛОВ
-   ========================================= */
 
-.scores-row.scrollable-row {
-  display: flex !important;/* =========================================
+/* =========================================
    ФИНАЛЬНЫЙ ФИКС КАРУСЕЛИ БАЛЛОВ
    ========================================= */
 .scores-row.scrollable-row {
@@ -532,7 +503,7 @@ select.answer-input {
 }
 
 .score-col.score-snap {
-  flex: 0 0 45% !important; /* Ровно 45% экрана, чтобы остальные обрезались и был скролл */
+  flex: 0 0 45% !important;
   min-width: 130px !important;
   scroll-snap-align: start;
   background: rgba(136, 136, 136, 0.05);
