@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import schoolsData from './schools.json'; // 👈 ИМПОРТИРУЕМ НАШУ НОВУЮ БАЗУ ШКОЛ
+import schoolsData from './schools.json';
 
 const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
@@ -13,65 +13,21 @@ function App() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
-  // Состояния для регистрации
-  const [regData, setRegData] = useState({
-    real_name: '',
-    city: '',     // Область/Город
-    district: '', // Район
-    school: ''    // Школа
-  });
+  // Регистрация
+  const [regData, setRegData] = useState({ real_name: '', city: '', district: '', school: '' });
 
-  const handleRegister = () => {
-    if (!regData.real_name || !regData.district || !regData.city || !regData.school) {
-      alert("Пожалуйста, заполни все поля!");
-      return;
-    }
-
-    setLoading(true);
-
-    fetch(`${API_URL}/update_profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, ...regData })
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Ошибка сервера');
-      return res.json();
-    })
-    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
-    .then(res => res.json())
-    .then(data => {
-      setUserData(data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error("Критическая ошибка регистрации:", err);
-      alert("Не удалось сохранить данные. Проверь соединение с сервером.");
-      setLoading(false);
-    });
-  };
-
-  // Опции
+  // Опции и VIP
   const [useTimer, setUseTimer] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // === ОПЛАТА VIP ===
-  const handleBuyVip = () => {
-    setShowPaymentModal(false);
-    fetch(`${API_URL}/request_vip`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
-    })
-    .then(() => alert("✅ Заявка отправлена! Менеджер подтвердит оплату в ближайшее время."));
-  };
+  // VIP ФОТО-РЕШЕБНИК
+  const [photoData, setPhotoData] = useState(null);
+  const [photoResult, setPhotoResult] = useState('');
 
-  // === ТЕМА И ЦВЕТА ===
+  // ТЕМА И ЦВЕТА
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     const savedTheme = localStorage.getItem('app_theme');
-    if (savedTheme !== null) {
-      return savedTheme === 'dark';
-    }
+    if (savedTheme !== null) return savedTheme === 'dark';
     return tg.colorScheme === 'dark';
   });
 
@@ -86,7 +42,7 @@ function App() {
     }
   }, [isDarkTheme]);
 
-  // === СОСТОЯНИЯ ТЕСТА ===
+  // СОСТОЯНИЯ ТЕСТА
   const [selectedSubject, setSelectedSubject] = useState('');
   const [tasks, setTasks] = useState([]);
   const [currentTaskIdx, setCurrentTaskIdx] = useState(0);
@@ -98,12 +54,12 @@ function App() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
-  // === ПОЛУЧЕНИЕ ID ===
+  // ПОЛУЧЕНИЕ ID
   const urlParams = new URLSearchParams(window.location.search);
   const fallbackId = urlParams.get('user_id');
   const userId = tg.initDataUnsafe?.user?.id || fallbackId;
 
-  // === ИНИЦИАЛИЗАЦИЯ ===
+  // ИНИЦИАЛИЗАЦИЯ
   useEffect(() => {
     tg.ready();
     tg.expand();
@@ -127,7 +83,7 @@ function App() {
     }
   }, [userId]);
 
-  // === ТАЙМЕР ===
+  // ТАЙМЕР
   useEffect(() => {
     if (currentScreen === 'solving' && useTimer && timeLeft > 0) {
       const timerId = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
@@ -138,126 +94,91 @@ function App() {
     }
   }, [currentScreen, timeLeft, useTimer]);
 
-  // === ЛОГИКА ТЕСТОВ ===
-  const handleSubjectClick = (subject) => {
-    setSelectedSubject(subject);
-    setCurrentScreen('amount_select');
+  // === ЛОГИКА ===
+  const handleRegister = () => {
+    if (!regData.real_name || !regData.district || !regData.city || !regData.school) {
+      alert("Пожалуйста, заполни все поля!"); return;
+    }
+    setLoading(true);
+    fetch(`${API_URL}/update_profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, ...regData })
+    })
+    .then(res => { if (!res.ok) throw new Error('Ошибка сервера'); return res.json(); })
+    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
+    .then(res => res.json())
+    .then(data => { setUserData(data); setLoading(false); })
+    .catch(err => { console.error(err); alert("Не удалось сохранить данные."); setLoading(false); });
   };
+
+  const handleBuyVip = () => {
+    setShowPaymentModal(false);
+    fetch(`${API_URL}/request_vip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    .then(() => alert("✅ Заявка отправлена! Менеджер подтвердит оплату в ближайшее время."));
+  };
+
+  const handleSubjectClick = (subject) => { setSelectedSubject(subject); setCurrentScreen('amount_select'); };
 
   const handleStartTest = (amount) => {
     setLoading(true);
     const encodedSubject = encodeURIComponent(selectedSubject);
-
     fetch(`${API_URL}/get_tasks?user_id=${userId}&subject=${encodedSubject}&amount=${amount}`)
       .then(res => res.json())
       .then(data => {
-        if (!Array.isArray(data) || data.length === 0) {
-          alert("Ты решил все задачи по этому предмету!");
-          setLoading(false);
-          setCurrentScreen('training');
-          return;
-        }
-        setTasks(data);
-        setCurrentTaskIdx(0);
-        setCorrectCount(0);
-        setSolvedIds([]);
-        setUserAnswers([]);
-        setAiFeedback("");
-        setTimeLeft(useTimer ? amount * 60 : -1);
-        setCurrentScreen('solving');
-        setLoading(false);
+        if (!Array.isArray(data) || data.length === 0) { alert("Ты решил все задачи по этому предмету!"); setLoading(false); setCurrentScreen('training'); return; }
+        setTasks(data); setCurrentTaskIdx(0); setCorrectCount(0); setSolvedIds([]); setUserAnswers([]); setAiFeedback(""); setTimeLeft(useTimer ? amount * 60 : -1); setCurrentScreen('solving'); setLoading(false);
       })
-      .catch(err => {
-        console.error(err);
-        alert("Ошибка загрузки задач.");
-        setLoading(false);
-      });
+      .catch(err => { console.error(err); alert("Ошибка загрузки задач."); setLoading(false); });
   };
 
   const handleNextTask = () => {
     const currentTask = tasks[currentTaskIdx];
     const isCorrect = answerInput.trim().toLowerCase() === String(currentTask.correct_answer).trim().toLowerCase();
-
     if (isCorrect) setCorrectCount(prev => prev + 1);
-
-    const newAnswers = [...userAnswers, {
-      task: currentTask,
-      userAnswer: answerInput,
-      isCorrect: isCorrect
-    }];
-    setUserAnswers(newAnswers);
-    setSolvedIds([...solvedIds, currentTask.id]);
-    setAnswerInput('');
-
-    if (currentTaskIdx + 1 < tasks.length) {
-      setCurrentTaskIdx(prev => prev + 1);
-    } else {
-      finishTest(isCorrect ? correctCount + 1 : correctCount, [...solvedIds, currentTask.id], newAnswers);
-    }
+    const newAnswers = [...userAnswers, { task: currentTask, userAnswer: answerInput, isCorrect: isCorrect }];
+    setUserAnswers(newAnswers); setSolvedIds([...solvedIds, currentTask.id]); setAnswerInput('');
+    if (currentTaskIdx + 1 < tasks.length) setCurrentTaskIdx(prev => prev + 1);
+    else finishTest(isCorrect ? correctCount + 1 : correctCount, [...solvedIds, currentTask.id], newAnswers);
   };
 
   const finishTest = (finalScore, finalIds, finalAnswers) => {
     setCurrentScreen('result');
     setIsAiLoading(true);
-
-    const wrongTasks = finalAnswers
-      .filter(ans => !ans.isCorrect)
-      .map(ans => ({
-        question: ans.task.question,
-        correct_answer: ans.task.correct_answer,
-        user_answer: ans.userAnswer,
-        explanation: ans.task.explanation
-      }));
-
+    const wrongTasks = finalAnswers.filter(ans => !ans.isCorrect).map(ans => ({ question: ans.task.question, correct_answer: ans.task.correct_answer, user_answer: ans.userAnswer, explanation: ans.task.explanation }));
     fetch(`${API_URL}/save_result`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: userId,
-        subject: selectedSubject,
-        correct_count: finalScore,
-        solved_ids: finalIds,
-        wrong_tasks: wrongTasks
-      })
+      body: JSON.stringify({ user_id: userId, subject: selectedSubject, correct_count: finalScore, solved_ids: finalIds, wrong_tasks: wrongTasks })
     })
     .then(res => res.json())
-    .then(data => {
-      setAiFeedback(data.ai_feedback);
-      setIsAiLoading(false);
-    });
+    .then(data => { setAiFeedback(data.ai_feedback); setIsAiLoading(false); });
   };
 
   const handleSwitchLanguage = () => {
     setLoading(true);
-    fetch(`${API_URL}/switch_language`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId })
-    })
-    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`))
-    .then(res => res.json())
-    .then(data => { setUserData(data); setLoading(false); });
+    fetch(`${API_URL}/switch_language`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: userId }) })
+    .then(() => fetch(`${API_URL}/get_user_data?user_id=${userId}`)).then(res => res.json()).then(data => { setUserData(data); setLoading(false); });
   };
 
-  // === ЛОГИКА ИКОНКИ ПРОФИЛЯ ===
   const getProfileIcon = () => {
     if (!userData) return '👤';
     const rank = leaderboard.findIndex(u => u.id === userData.id);
-    if (rank === 0) return '🥇';
-    if (rank === 1) return '🥈';
-    if (rank === 2) return '🥉';
-    if (userData.role === 'admin') return '👨‍💻';
-    if (userData.role === 'vip') return '👑';
+    if (rank === 0) return '🥇'; if (rank === 1) return '🥈'; if (rank === 2) return '🥉';
+    if (userData.role === 'admin') return '👨‍💻'; if (userData.role === 'vip') return '👑';
     return '👤';
   };
 
-  // === ОТРИСОВКА ИНТЕРФЕЙСА ===
 
+  // === ОТРИСОВКА ИНТЕРФЕЙСА ===
   if (loading) {
     return (
       <div className={`app-container modern-ui loader-screen ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <div className="modern-logo" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>🧬 O.R.T. AI</div>
-        <div className="spinner"></div>
+        <div className="modern-logo" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>🧬 O.R.T. AI</div><div className="spinner"></div>
       </div>
     );
   }
@@ -265,80 +186,33 @@ function App() {
   if (!userId) {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center'}}>
-        <div style={{fontSize: '4rem', marginBottom: '10px'}}>🔒</div>
-        <h2 className="title" style={{marginBottom: '10px', color: isDarkTheme ? '#fff' : '#111'}}>Доступ закрыт</h2>
-        <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>
-          Телеграм не передал твой ID. Попробуй запустить бота с мобильного телефона или нажми /start.
-        </p>
+        <div style={{fontSize: '4rem', marginBottom: '10px'}}>🔒</div><h2 className="title" style={{marginBottom: '10px', color: isDarkTheme ? '#fff' : '#111'}}>Доступ закрыт</h2>
+        <p className="subtitle" style={{lineHeight: '1.5', color: isDarkTheme ? '#aaa' : '#666'}}>Телеграм не передал твой ID. Попробуй запустить бота с мобильного телефона или нажми /start.</p>
       </div>
     );
   }
 
-  // --- НОВЫЙ ЭКРАН РЕГИСТРАЦИИ (С УМНЫМИ СПИСКАМИ) ---
   if (userData && !userData.real_name) {
-    // Вытягиваем данные из нашего JSON
     const regions = Object.keys(schoolsData || {});
     const districts = regData.city && schoolsData[regData.city] ? Object.keys(schoolsData[regData.city]) : [];
     const schools = regData.district && schoolsData[regData.city]?.[regData.district] ? schoolsData[regData.city][regData.district] : [];
-
-    // Проверяем, всё ли заполнено, чтобы включить кнопку
     const isFormValid = regData.real_name && regData.city && regData.district && regData.school;
 
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-        <div className="modern-header">
-          <div className="modern-logo">🧬 Регистрация</div>
-          <p className="subtitle">Выбери свою школу, чтобы продолжить обучение</p>
-        </div>
-
+        <div className="modern-header"><div className="modern-logo">🧬 Регистрация</div><p className="subtitle">Выбери свою школу, чтобы продолжить обучение</p></div>
         <div className="answer-section" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-          <input
-            type="text"
-            className="answer-input"
-            placeholder="Твои Имя и Фамилия"
-            value={regData.real_name}
-            onChange={(e) => setRegData({...regData, real_name: e.target.value})}
-          />
-
-          <select
-            className="answer-input"
-            value={regData.city}
-            onChange={(e) => setRegData({...regData, city: e.target.value, district: '', school: ''})}
-          >
-            <option value="">Выберите Область / Город</option>
-            {regions.map(r => <option key={r} value={r}>{r}</option>)}
+          <input type="text" className="answer-input" placeholder="Твои Имя и Фамилия" value={regData.real_name} onChange={(e) => setRegData({...regData, real_name: e.target.value})} />
+          <select className="answer-input" value={regData.city} onChange={(e) => setRegData({...regData, city: e.target.value, district: '', school: ''})}>
+            <option value="">Выберите Область / Город</option>{regions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
-
-          <select
-            className="answer-input"
-            value={regData.district}
-            onChange={(e) => setRegData({...regData, district: e.target.value, school: ''})}
-            disabled={!regData.city}
-            style={{ opacity: !regData.city ? 0.5 : 1 }}
-          >
-            <option value="">Выберите Район</option>
-            {districts.map(d => <option key={d} value={d}>{d}</option>)}
+          <select className="answer-input" value={regData.district} onChange={(e) => setRegData({...regData, district: e.target.value, school: ''})} disabled={!regData.city} style={{ opacity: !regData.city ? 0.5 : 1 }}>
+            <option value="">Выберите Район</option>{districts.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
-
-          <select
-            className="answer-input"
-            value={regData.school}
-            onChange={(e) => setRegData({...regData, school: e.target.value})}
-            disabled={!regData.district}
-            style={{ opacity: !regData.district ? 0.5 : 1 }}
-          >
-            <option value="">Выберите Школу</option>
-            {schools.map(s => <option key={s} value={s}>{s}</option>)}
+          <select className="answer-input" value={regData.school} onChange={(e) => setRegData({...regData, school: e.target.value})} disabled={!regData.district} style={{ opacity: !regData.district ? 0.5 : 1 }}>
+            <option value="">Выберите Школу</option>{schools.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-
-          <button
-            className="modern-btn lang-btn"
-            onClick={handleRegister}
-            disabled={!isFormValid}
-            style={{ opacity: isFormValid ? 1 : 0.5, marginTop: '10px' }}
-          >
-            💾 Сохранить и начать
-          </button>
+          <button className="modern-btn lang-btn" onClick={handleRegister} disabled={!isFormValid} style={{ opacity: isFormValid ? 1 : 0.5, marginTop: '10px' }}>💾 Сохранить и начать</button>
         </div>
       </div>
     );
@@ -348,126 +222,134 @@ function App() {
     const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ */}
         {showPaymentModal && (
           <div className="modal-overlay">
             <div className="modal-content geometric-dark">
               <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem' }}>Оплата VIP-статуса</h3>
-              <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
-                Отсканируй QR-код через приложение <b>MBank</b> или сохрани картинку и загрузи в банк.
-              </p>
-              <div className="qr-container">
-                <img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR MBank" className="qr-image" />
-              </div>
-              <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
-                После перевода обязательно нажми кнопку ниже, чтобы мы проверили платеж.
-              </p>
-              <div className="modal-buttons">
-                <button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button>
-                <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button>
-              </div>
+              <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>Отсканируй QR-код через приложение <b>MBank</b> или сохрани картинку и загрузи в банк.</p>
+              <div className="qr-container"><img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR MBank" className="qr-image" /></div>
+              <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>После перевода обязательно нажми кнопку ниже, чтобы мы проверили платеж.</p>
+              <div className="modal-buttons"><button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button><button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button></div>
             </div>
           </div>
         )}
-
-        <div className="modern-header">
-          <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
-          <p className="subtitle">Твой ИИ-помощник к ОРТ</p>
-        </div>
-        <div className="main-action-card" onClick={() => setCurrentScreen('training')}>
-          <div className="card-icon-large">📖</div>
-          <div className="card-text">
-            <h3>Тренировка</h3>
-            <p>Начать подготовку</p>
-          </div>
-        </div>
+        <div className="modern-header"><div className="modern-logo">🧬 O.R.T. AI</div><h2>Привет, {userData?.first_name || 'Ученик'}!</h2><p className="subtitle">Твой ИИ-помощник к ОРТ</p></div>
+        <div className="main-action-card" onClick={() => setCurrentScreen('training')}><div className="card-icon-large">📖</div><div className="card-text"><h3>Тренировка</h3><p>Начать подготовку</p></div></div>
         <div className="dashboard-grid">
-          <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
-            <div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p>
-          </div>
-          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
-            <div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p>
-          </div>
-          <div className="dash-card leader-card" onClick={() => {
-            setLoading(true);
-            fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => {
-              setLeaderboard(data); setCurrentScreen('leaderboard'); setLoading(false);
-            });
-          }}>
-            <div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p>
-          </div>
+          <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}><div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p></div>
+          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}><div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p></div>
+          <div className="dash-card leader-card" onClick={() => { setLoading(true); fetch(`${API_URL}/get_leaderboard`).then(res => res.json()).then(data => { setLeaderboard(data); setCurrentScreen('leaderboard'); setLoading(false); }); }}><div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p></div>
         </div>
         <div className="scores-section">
           <h3 className="section-title">Мои Баллы</h3>
           <div className="scores-row scrollable-row">
-            {/* Карточка 1: Math */}
-            <div className="score-col score-snap">
-              <div className="score-icon">🧮</div><span className="score-label">Math</span>
-              <div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div>
-              <span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span>
-            </div>
-
-            {/* Карточка 2: Grammar */}
-            <div className="score-col score-snap">
-              <div className="score-icon">📜</div><span className="score-label">Grammar</span>
-              <div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div>
-              <span className="score-val">{userData?.scores?.grammar || 0} pts</span>
-            </div>
-
-            {/* Карточка 3: Reading */}
-            <div className="score-col score-snap">
-              <div className="score-icon">👁️</div><span className="score-label">Reading</span>
-              <div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div>
-              <span className="score-val">{userData?.scores?.reading || 0} pts</span>
-            </div>
-
-            {/* Карточка 4: Аналогии */}
-            <div className="score-col score-snap">
-              <div className="score-icon">🔗</div><span className="score-label">Analogies</span>
-              <div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.analogies || 0) * 5, 100)}%`, background: '#9b59b6'}}></div></div>
-              <span className="score-val">{userData?.scores?.analogies || 0} pts</span>
-            </div>
-
-            {/* Карточка 5: Дополнение предложений */}
-            <div className="score-col score-snap">
-              <div className="score-icon">📝</div><span className="score-label">Sentences</span>
-              <div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.sentences || 0) * 5, 100)}%`, background: '#f39c12'}}></div></div>
-              <span className="score-val">{userData?.scores?.sentences || 0} pts</span>
-            </div>
+            <div className="score-col score-snap"><div className="score-icon">🧮</div><span className="score-label">Math</span><div className="progress-bar"><div className="fill math-fill" style={{width: `${Math.min(((userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)) * 2, 100)}%`}}></div></div><span className="score-val">{(userData?.scores?.algebra || 0) + (userData?.scores?.geometry || 0)} pts</span></div>
+            <div className="score-col score-snap"><div className="score-icon">📜</div><span className="score-label">Grammar</span><div className="progress-bar"><div className="fill grammar-fill" style={{width: `${Math.min((userData?.scores?.grammar || 0) * 5, 100)}%`}}></div></div><span className="score-val">{userData?.scores?.grammar || 0} pts</span></div>
+            <div className="score-col score-snap"><div className="score-icon">👁️</div><span className="score-label">Reading</span><div className="progress-bar"><div className="fill reading-fill" style={{width: `${Math.min((userData?.scores?.reading || 0) * 5, 100)}%`}}></div></div><span className="score-val">{userData?.scores?.reading || 0} pts</span></div>
+            <div className="score-col score-snap"><div className="score-icon">🔗</div><span className="score-label">Analogies</span><div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.analogies || 0) * 5, 100)}%`, background: '#9b59b6'}}></div></div><span className="score-val">{userData?.scores?.analogies || 0} pts</span></div>
+            <div className="score-col score-snap"><div className="score-icon">📝</div><span className="score-label">Sentences</span><div className="progress-bar"><div className="fill" style={{width: `${Math.min((userData?.scores?.sentences || 0) * 5, 100)}%`, background: '#f39c12'}}></div></div><span className="score-val">{userData?.scores?.sentences || 0} pts</span></div>
           </div>
         </div>
-
         <button className="modern-btn vip-btn vip-premium-card" onClick={() => setShowPaymentModal(true)}>🚀 Купить VIP Разбор</button>
-
         {userData?.role === 'admin' && (
-          <button
-            className="modern-btn"
-            style={{background: '#2c3e50', color: 'white', marginTop: '10px'}}
-            onClick={() => {
-              setLoading(true);
-              fetch(`${API_URL}/get_all_users`)
-                .then(res => {
-                  if (!res.ok) throw new Error('Ошибка на сервере');
-                  return res.json();
-                })
-                .then(data => {
-                  setAllUsers(data);
-                  setCurrentScreen('admin_panel');
-                  setLoading(false);
-                })
-                .catch(err => {
-                  console.error(err);
-                  alert("Ошибка! Проверь запущен ли бот на сервере.");
-                  setLoading(false);
-                });
-            }}
-          >
-            ⚙️ Панель управления
-          </button>
+          <button className="modern-btn" style={{background: '#2c3e50', color: 'white', marginTop: '10px'}} onClick={() => { setLoading(true); fetch(`${API_URL}/get_all_users`).then(res => { if (!res.ok) throw new Error('Ошибка на сервере'); return res.json(); }).then(data => { setAllUsers(data); setCurrentScreen('admin_panel'); setLoading(false); }).catch(err => { console.error(err); alert("Ошибка! Проверь запущен ли бот на сервере."); setLoading(false); }); }}>⚙️ Панель управления</button>
+        )}
+        <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
+      </div>
+    );
+  }
+
+  // --- НОВЫЙ ЭКРАН: ФОТО-РЕШЕБНИК ---
+  if (currentScreen === 'photo_solve') {
+    const handleImageUpload = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1000; // Ужимаем для экономии трафика и токенов
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Качество JPEG 80% — выглядит отлично, весит мало
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          setPhotoData(compressedBase64);
+          setPhotoResult('');
+        };
+      };
+    };
+
+    const sendPhotoToAI = () => {
+      setLoading(true);
+      fetch(`${API_URL}/solve_photo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, image_base64: photoData })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setPhotoResult(data.answer || "Не удалось получить ответ ИИ.");
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Ошибка при отправке фото на сервер.");
+        setLoading(false);
+      });
+    };
+
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-header" style={{ marginBottom: '20px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📸 VIP Фото-разбор</h2>
+          <p className="subtitle">Сфотографируй задачу, и ИИ решит её пошагово</p>
+        </div>
+
+        {!photoData ? (
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <label htmlFor="photo-upload" className="modern-btn vip-premium-card" style={{ display: 'inline-block', padding: '25px', cursor: 'pointer', borderRadius: '20px' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
+              Открыть Камеру / Галерею
+            </label>
+            <input id="photo-upload" type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleImageUpload} />
+            <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '25px', lineHeight: '1.5' }}>
+              💡 <b>Совет:</b> Снимай при хорошем свете.<br/>Печатный текст или задачи с экрана<br/>распознаются лучше всего!
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <img src={photoData} alt="Предпросмотр" style={{ width: '100%', borderRadius: '16px', border: `2px solid ${isDarkTheme ? '#444' : '#eee'}` }} />
+
+            {!photoResult ? (
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button className="modern-btn lang-btn" onClick={sendPhotoToAI} style={{ flex: 2, marginBottom: 0 }}>✨ Решить задачу</button>
+                <button className="modern-btn back-btn-outline" onClick={() => setPhotoData(null)} style={{ flex: 1, marginBottom: 0 }}>🔄 Другое фото</button>
+              </div>
+            ) : (
+              <div className="ai-feedback-box" style={{ background: isDarkTheme ? '#1e1e1e' : '#f0f7ff', padding: '20px', borderRadius: '16px', borderLeft: '4px solid #3aa1e9' }}>
+                 <h3 style={{marginBottom: '15px', color: isDarkTheme ? '#fff' : '#111'}}>🤖 Решение ИИ:</h3>
+                 <div className="ai-text" dangerouslySetInnerHTML={{ __html: photoResult.replace(/\n/g, '<br/>') }} />
+              </div>
+            )}
+          </div>
         )}
 
-        <button className="modern-btn exit-btn" onClick={() => tg.close()}>🚪 Выход</button>
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => { setCurrentScreen('training'); setPhotoData(null); setPhotoResult(''); }}>⬅ Назад к Предметам</button>
       </div>
     );
   }
@@ -565,12 +447,33 @@ function App() {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}><div className="modern-logo">🧬 O.R.T. AI</div><h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📚 Предметы</h2></div>
+
         <div className="subjects-grid-modern">
           {subjectsList.map(subj => (
             <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleSubjectClick(subj.name)}><div className="subject-icon-glass">{subj.icon}</div><span className="subject-name-modern">{subj.name}</span></div>
           ))}
         </div>
-        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+
+        {/* НОВАЯ КНОПКА VIP ФОТО-РЕШЕБНИК */}
+        <div style={{ marginTop: '30px' }}>
+          <button
+            className="modern-btn vip-premium-card"
+            style={{ width: '100%', padding: '20px' }}
+            onClick={() => {
+              if (userData?.role === 'vip' || userData?.role === 'admin') {
+                setCurrentScreen('photo_solve');
+                setPhotoData(null);
+                setPhotoResult('');
+              } else {
+                alert("🔒 Эта функция доступна только для VIP-пользователей!\nПриобрести VIP можно на главном экране.");
+              }
+            }}
+          >
+            📸 VIP: Решить задачу по фото
+          </button>
+        </div>
+
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '20px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
     );
   }
