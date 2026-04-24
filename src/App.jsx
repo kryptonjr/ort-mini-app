@@ -448,6 +448,15 @@ function App() {
            </div>
         </div>
         <div className="buttons-column">
+          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
+          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
+          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
+          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
+        </div>
+      </div>
+    );
+  }
+        <div className="buttons-column">
           <button className="modern-btn vip-btn" onClick={() => handleStartTest(5)}>5 задач</button>
           <button className="modern-btn vip-btn" onClick={() => handleStartTest(10)}>10 задач</button>
           <button className="modern-btn vip-btn" onClick={() => handleStartTest(15)}>15 задач</button>
@@ -514,18 +523,48 @@ function App() {
     );
   }
 
-  // Экраны Помощи и Админки
-  if (currentScreen === 'help') return (
-    <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-      <div className="modern-header"><h2>🆘 Помощь</h2></div>
-      <div className="ranking-list" style={{gap:'15px'}}>
-        <div className="ranking-item"><b>📚 Учеба:</b> Решай задачи в разделе Тренировка.</div>
-        <div className="ranking-item"><b>👑 VIP:</b> Получай разбор ошибок и решение по фото.</div>
-        <div className="ranking-item"><b>🏆 Топ:</b> Твой балл — это сумма всех решенных задач.</div>
+  if (currentScreen === 'help') {
+    const helpInstructions = [
+      { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
+      { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
+      { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
+      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' },
+      { name: 'Тема', icon: '🌗', text: 'Переключай светлую и темную тему в Профиле.', colorClass: 'subj-teal' },
+      { name: 'Топ-10', icon: '🏆', text: 'Решай задачи и поднимайся в таблице лидеров.', colorClass: 'subj-red' }
+    ];
+    return (
+      <div className={`app-container modern-ui help-modern ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-header" style={{ marginBottom: '30px' }}>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>🆘 Помощь</h2>
+        </div>
+        <div className="modern-dashboard-grid help-cards-grid">
+          {helpInstructions.map((item, idx) => (
+            <div key={idx} className={`stat-card-modern ${item.colorClass}`}>
+              <div className="stat-icon-glass">{item.icon}</div>
+              <div className="stat-text">
+                <span className="stat-label help-title-modern">{item.name}</span>
+                <span className="stat-score help-subtitle">{item.text}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="modern-dashboard-grid" style={{ marginBottom: '20px' }}>
+           <div className="stat-card-modern vip-support-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '15px' }}>
+              <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div>
+              <div className="stat-text" style={{ textAlign: 'left' }}>
+                <span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span>
+                <span className="stat-score help-subtitle">Связаться с нами</span>
+              </div>
+              <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
+                <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto', marginBottom: 0, background: '#3aa1e9', color: 'white' }}>@Support</button>
+              </a>
+           </div>
+        </div>
+        <button className="modern-btn back-btn-outline" onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
       </div>
-      <button className="modern-btn back-btn-outline" style={{marginTop:'30px'}} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
-    </div>
-  );
+    );
+  }
 
   if (currentScreen === 'admin_panel') return (
     <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
