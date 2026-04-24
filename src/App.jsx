@@ -448,9 +448,9 @@ function App() {
            </div>
         </div>
         <div className="buttons-column">
-          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
-          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
-          <button className="modern-btn" style={{background: '#3aa1e9', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
           <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
         </div>
       </div>
