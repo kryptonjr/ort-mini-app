@@ -17,6 +17,7 @@ function App() {
   const [schoolLeaderboard, setSchoolLeaderboard] = useState([]);
   const [leaderboardTab, setLeaderboardTab] = useState('personal');
   const [allUsers, setAllUsers] = useState([]);
+  const [duelHistory, setDuelHistory] = useState([]);
 
   // Регистрация
   const [regData, setRegData] = useState({ real_name: '', city: '', district: '', school: '' });
@@ -349,18 +350,35 @@ function App() {
         </div>
 
 
-        <div className="dashboard-grid">
-          <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}><div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p></div>
-          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}><div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p></div>
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
+            <div className="dash-icon">{getProfileIcon()}</div>
+            <h4>Профиль</h4>
+          </div>
           <div className="dash-card leader-card" onClick={() => {
+             // ... существующий код загрузки лидерборда ...
+          }}>
+            <div className="dash-icon">🏆</div>
+            <h4>ТОП-10</h4>
+          </div>
+          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
+            <div className="dash-icon">🆘</div>
+            <h4>Помощь</h4>
+          </div>
+          {/* НОВАЯ КНОПКА ИСТОРИИ */}
+          <div className="dash-card" style={{ background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', color: 'white' }} onClick={() => {
             setLoading(true);
-            Promise.all([
-              fetch(`${API_URL}/get_leaderboard`).then(res => res.json()),
-              fetch(`${API_URL}/get_school_leaderboard`).then(res => res.json())
-            ]).then(([usersData, schoolsData]) => {
-              setLeaderboard(usersData); setSchoolLeaderboard(schoolsData); setCurrentScreen('leaderboard'); setLoading(false);
-            }).catch(() => setLoading(false));
-          }}><div className="dash-icon">🏆</div><h4>ТОП-10</h4><p>Лидеры</p></div>
+            fetch(`${API_URL}/get_my_duels?user_id=${userId}`)
+              .then(res => res.json())
+              .then(data => {
+                setDuelHistory(data);
+                setCurrentScreen('duel_history');
+                setLoading(false);
+              });
+          }}>
+            <div className="dash-icon">📜</div>
+            <h4 style={{ color: 'white' }}>История</h4>
+          </div>
         </div>
 
         {/* СКОРБОРД */}
@@ -935,7 +953,103 @@ function App() {
       </div>
     );
   }
+  // ЭКРАН ИСТОРИИ ДУЕЛЕЙ
+  if (currentScreen === 'duel_history') {
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-header" style={{ marginBottom: '20px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📜 История дуэлей</h2>
+          <p className="subtitle">Твои последние сражения</p>
+        </div>
 
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {duelHistory.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>Ты еще не участвовал в дуэлях. Пора бросить кому-нибудь вызов! ⚔️</p>
+          ) : (
+            duelHistory.map((duel) => {
+              const isFinished = duel.status === 'finished';
+              const isMyWin = isFinished && duel.winner_id === userData?.id;
+              const isDraw = isFinished && duel.winner_id === null;
+
+              let resultColor = '#888';
+              let resultText = '🕒 В процессе...';
+
+              if (isFinished) {
+                  if (isDraw) {
+                      resultColor = '#f39c12'; // Оранжевый для ничьей
+                      resultText = '🤝 Ничья';
+                  } else if (isMyWin) {
+                      resultColor = '#2ecc71'; // Зеленый для победы
+                      resultText = '🏆 Победа';
+                  } else {
+                      resultColor = '#e74c3c'; // Красный для поражения
+                      resultText = '💀 Поражение';
+                  }
+              }
+
+              // Функция для перевода секунд в минуты:секунды
+              const formatTime = (sec) => {
+                  if (sec === null || sec === undefined) return '--:--';
+                  const m = Math.floor(sec / 60);
+                  const s = sec % 60;
+                  return `${m}:${s < 10 ? '0' : ''}${s}`;
+              };
+
+              return (
+                <div key={duel.id} style={{
+                  background: isDarkTheme ? '#1e1e1e' : 'white',
+                  borderRadius: '16px',
+                  padding: '15px',
+                  borderLeft: `6px solid ${resultColor}`,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: `1px solid ${isDarkTheme ? '#333' : '#eee'}`, paddingBottom: '10px' }}>
+                     <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: isDarkTheme ? '#aaa' : '#888' }}>#{duel.id} • {duel.subject}</span>
+                     <span style={{ fontWeight: '900', fontSize: '0.9rem', color: resultColor, textTransform: 'uppercase' }}>{resultText}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     {/* Игрок 1 (Создатель) */}
+                     <div style={{ flex: 1, textAlign: 'center' }}>
+                        <b style={{ color: isDarkTheme ? '#fff' : '#111', fontSize: '0.95rem' }}>{duel.creator_name || 'Инкогнито'}</b>
+                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#3aa1e9', margin: '5px 0' }}>
+                           {duel.creator_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span>
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>
+                           ⏱ {formatTime(duel.creator_time)}
+                        </div>
+                     </div>
+
+                     {/* Иконка мечей по центру */}
+                     <div style={{ fontSize: '1.5rem', margin: '0 10px', color: isDarkTheme ? '#444' : '#eee' }}>⚔️</div>
+
+                     {/* Игрок 2 (Оппонент) */}
+                     <div style={{ flex: 1, textAlign: 'center' }}>
+                        <b style={{ color: isDarkTheme ? '#fff' : '#111', fontSize: '0.95rem' }}>{duel.opponent_name || 'Ожидает...'}</b>
+                        {duel.opponent_name ? (
+                          <>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#e74c3c', margin: '5px 0' }}>
+                               {duel.opponent_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>
+                               ⏱ {formatTime(duel.opponent_time)}
+                            </div>
+                          </>
+                        ) : (
+                          <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px', fontStyle: 'italic' }}>Ссылка отправлена</div>
+                        )}
+                     </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '25px' }} onClick={() => setCurrentScreen('main')}>⬅ На главную</button>
+      </div>
+    );
+  }
   return null;
 }
 
