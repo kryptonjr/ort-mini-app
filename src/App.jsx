@@ -331,17 +331,26 @@ function App() {
     const totalScore = userData?.scores ? Object.values(userData.scores).reduce((a, b) => a + b, 0) : 0;
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+
+        {/* МОДАЛЬНОЕ ОКНО ОПЛАТЫ */}
         {showPaymentModal && (
           <div className="modal-overlay">
             <div className="modal-content geometric-dark">
               <h3 style={{ marginBottom: '10px' }}>Оплата VIP-статуса</h3>
               <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>Отсканируй QR в приложении <b>MBank</b>.</p>
               <div className="qr-container"><img src="https://i.postimg.cc/fL92DHSX/qr.jpg" alt="QR" className="qr-image" /></div>
-              <div className="modal-buttons"><button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button><button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button></div>
+              <div className="modal-buttons">
+                <button className="modern-btn lang-btn" onClick={handleBuyVip}>✅ Я оплатил</button>
+                <button className="modern-btn back-btn-outline" onClick={() => setShowPaymentModal(false)}>Отмена</button>
+              </div>
             </div>
           </div>
         )}
-        <div className="modern-header"><div className="modern-logo">🧬 O.R.T. AI</div><h2>Привет, {userData?.first_name || 'Ученик'}!</h2></div>
+
+        <div className="modern-header">
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2>Привет, {userData?.first_name || 'Ученик'}!</h2>
+        </div>
 
         {/* 1. КАРТОЧКА ТРЕНИРОВКИ */}
         <div className="main-action-card" onClick={() => { setActiveDuelId(null); setCurrentScreen('training'); }}>
@@ -370,7 +379,7 @@ function App() {
           <div className="card-text"><h3>История дуэлей</h3><p>Твои результаты</p></div>
         </div>
 
-        {/* СЕТКА (Возвращаем ей 3 колонки, так как Историю мы отсюда забрали) */}
+        {/* СЕТКА */}
         <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
             <div className="dash-icon">{getProfileIcon()}</div>
@@ -394,25 +403,6 @@ function App() {
             <div className="dash-icon">🏆</div>
             <h4>ТОП-10</h4>
             <p>Лидеры</p>
-          </div>
-        </div>
-          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
-            <div className="dash-icon">🆘</div>
-            <h4>Помощь</h4>
-          </div>
-          {/* НОВАЯ КНОПКА ИСТОРИИ */}
-          <div className="dash-card" style={{ background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', color: 'white' }} onClick={() => {
-            setLoading(true);
-            fetch(`${API_URL}/get_my_duels?user_id=${userId}`)
-              .then(res => res.json())
-              .then(data => {
-                setDuelHistory(data);
-                setCurrentScreen('duel_history');
-                setLoading(false);
-              });
-          }}>
-            <div className="dash-icon">📜</div>
-            <h4 style={{ color: 'white' }}>История</h4>
           </div>
         </div>
 
