@@ -364,22 +364,7 @@ function App() {
           <div className="card-text"><h3>Дуэли</h3><p>Сразись с друзьями</p></div>
         </div>
 
-        {/* 3. КАРТОЧКА ИСТОРИИ */}
-        <div className="main-action-card" style={{ background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', marginTop: '-10px' }} onClick={() => {
-            setLoading(true);
-            fetch(`${API_URL}/get_my_duels?user_id=${userId}`)
-              .then(res => res.json())
-              .then(data => {
-                setDuelHistory(data);
-                setCurrentScreen('duel_history');
-                setLoading(false);
-              });
-        }}>
-          <div className="card-icon-large" style={{ background: 'rgba(0,0,0,0.1)' }}>📜</div>
-          <div className="card-text"><h3>История дуэлей</h3><p>Твои результаты</p></div>
-        </div>
-
-        {/* СЕТКА */}
+        {/* СЕТКА (3 колонки) */}
         <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
             <div className="dash-icon">{getProfileIcon()}</div>
@@ -424,7 +409,7 @@ function App() {
       </div>
     );
   }
-  // ЭКРАН ВЫБОРА ПРЕДМЕТА ДЛЯ ДУЭЛИ
+  // ЭКРАН ВЫБОРА ПРЕДМЕТА ДЛЯ ДУЭЛИ (С КНОПКОЙ ИСТОРИИ)
   if (currentScreen === 'duel_subjects') {
     const subjectsList = [
       { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
@@ -436,12 +421,31 @@ function App() {
     ];
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <div className="modern-header" style={{ marginBottom: '30px' }}>
+        <div className="modern-header" style={{ marginBottom: '20px' }}>
           <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>⚔️ Выбери предмет</h2>
-          <p className="subtitle">По какому предмету бросим вызов?</p>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>⚔️ Арена</h2>
+          <p className="subtitle">Брось вызов или посмотри историю</p>
         </div>
 
+        {/* КНОПКА ИСТОРИИ ДУЭЛЕЙ ПЕРЕЕХАЛА СЮДА */}
+        <div className="main-action-card" style={{ background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', marginBottom: '25px', padding: '15px 20px' }} onClick={() => {
+            setLoading(true);
+            fetch(`${API_URL}/get_my_duels?user_id=${userId}`)
+              .then(res => res.json())
+              .then(data => {
+                setDuelHistory(data);
+                setCurrentScreen('duel_history');
+                setLoading(false);
+              });
+        }}>
+          <div className="card-icon-large" style={{ background: 'rgba(0,0,0,0.1)', fontSize: '2rem', width: '50px', height: '50px' }}>📜</div>
+          <div className="card-text">
+            <h3 style={{ fontSize: '1.2rem' }}>История сражений</h3>
+            <p style={{ fontSize: '0.85rem' }}>Победы и поражения</p>
+          </div>
+        </div>
+
+        <h3 style={{ textAlign: 'center', marginBottom: '15px' }}>Выбери предмет для новой дуэли:</h3>
         <div className="subjects-grid-modern">
           {subjectsList.map(subj => (
             <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleCreateDuel(subj.name)}>
@@ -450,7 +454,7 @@ function App() {
             </div>
           ))}
         </div>
-        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => setCurrentScreen('main')}>⬅ На главную</button>
       </div>
     );
   }
@@ -480,7 +484,7 @@ function App() {
     );
   }
 
-  // НОВЫЙ ЭКРАН: ЛОББИ ДУЭЛИ
+  // ЭКРАН: ЛОББИ ДУЭЛИ
   if (currentScreen === 'duel_lobby') {
     const duelLink = `https://t.me/${BOT_USERNAME}?start=duel_${activeDuelId}`;
 
@@ -864,11 +868,14 @@ function App() {
     );
   }
 
-  // ЭКРАН ПОМОЩИ
+  // ЭКРАН ПОМОЩИ (ПОЛНЫЙ, БЕЗ СОКРАЩЕНИЙ)
   if (currentScreen === 'help') {
     const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
       { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
+      { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
+      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' },
+      { name: 'Тема', icon: '🌗', text: 'Переключай светлую и темную тему в Профиле.', colorClass: 'subj-teal' },
       { name: 'Топ-10', icon: '🏆', text: 'Решай задачи и поднимайся в таблице лидеров.', colorClass: 'subj-red' }
     ];
     return (
@@ -929,7 +936,7 @@ function App() {
     );
   }
 
-  // ЭКРАН ИСТОРИИ ДУЕЛЕЙ
+  // ЭКРАН ИСТОРИИ ДУЕЛЕЙ (С ПЛАВАЮЩЕЙ КНОПКОЙ НАЗАД)
   if (currentScreen === 'duel_history') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
@@ -993,10 +1000,10 @@ function App() {
           )}
         </div>
 
-        {/* ПЛАВАЮЩАЯ КНОПКА "НАЗАД" */}
+        {/* ПЛАВАЮЩАЯ КНОПКА "НАЗАД" - ВОЗВРАЩАЕТ В ДУЭЛИ */}
         <button
           style={{ position: 'fixed', bottom: '30px', right: '20px', width: '60px', height: '60px', borderRadius: '50%', background: '#3aa1e9', color: 'white', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', cursor: 'pointer', zIndex: 1000 }}
-          onClick={() => setCurrentScreen('main')}
+          onClick={() => setCurrentScreen('duel_subjects')}
         >
           🔙
         </button>
