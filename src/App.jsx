@@ -504,7 +504,7 @@ function App() {
             <input id="photo-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
             <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '25px', lineHeight: '1.5' }}>
               💡 <b>Совет:</b> Снимай при хорошем свете.<br/>Печатный текст или задачи с экрана<br/>распознаются лучше всего!
-                 <b>Помни, ИИ может ошибаться по этому перепроверяй ответы
+                 Помни, ИИ может ошибаться по этому перепроверяй ответы
             </p>
           </div>
         ) : (
