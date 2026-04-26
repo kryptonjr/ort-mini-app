@@ -424,8 +424,63 @@ function App() {
       </div>
     );
   }
+  // ЭКРАН ВЫБОРА ПРЕДМЕТА ДЛЯ ДУЭЛИ
+  if (currentScreen === 'duel_subjects') {
+    const subjectsList = [
+      { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
+      { name: 'Геометрия', icon: '📐', colorClass: 'subj-green' },
+      { name: 'Аналогии', icon: '🔗', colorClass: 'subj-purple' },
+      { name: 'Дополнение предложений', icon: '📝', colorClass: 'subj-orange' },
+      { name: 'Чтение и понимание', icon: '📖', colorClass: 'subj-teal' },
+      { name: 'Грамматика', icon: '🅰️', colorClass: 'subj-red' }
+    ];
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-header" style={{ marginBottom: '30px' }}>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>⚔️ Выбери предмет</h2>
+          <p className="subtitle">По какому предмету бросим вызов?</p>
+        </div>
 
-  // === НОВЫЙ ЭКРАН: ЛОББИ ДУЭЛИ ===
+        <div className="subjects-grid-modern">
+          {subjectsList.map(subj => (
+            <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleCreateDuel(subj.name)}>
+              <div className="subject-icon-glass">{subj.icon}</div>
+              <span className="subject-name-modern">{subj.name}</span>
+            </div>
+          ))}
+        </div>
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+      </div>
+    );
+  }
+
+  // ЭКРАН ВЫБОРА КОЛИЧЕСТВА ЗАДАЧ (ОЧИЩЕН ОТ ДУЭЛЕЙ)
+  if (currentScreen === 'amount_select') {
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{textAlign: 'center'}}>
+        <h2 className="title" style={{marginBottom: '15px'}}>{selectedSubject}</h2>
+
+        <div style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', marginBottom: '25px', border: `1px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
+           <p style={{marginBottom: '15px', fontWeight: 'bold', color: isDarkTheme ? '#fff' : '#111'}}>Режим прохождения:</p>
+           <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
+             <div onClick={() => setUseTimer(true)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: useTimer ? '#3aa1e9' : 'transparent', color: useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${useTimer ? '#3aa1e9' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>⏱ На время</div>
+             <div onClick={() => setUseTimer(false)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: !useTimer ? '#e74c3c' : 'transparent', color: !useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${!useTimer ? '#e74c3c' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>🧘 Без таймера</div>
+           </div>
+        </div>
+
+        <p className="subtitle" style={{marginBottom: '15px'}}>Сколько задач хочешь решить?</p>
+        <div className="buttons-column">
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
+          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
+        </div>
+      </div>
+    );
+  }
+
+  // НОВЫЙ ЭКРАН: ЛОББИ ДУЭЛИ
   if (currentScreen === 'duel_lobby') {
     const duelLink = `https://t.me/${BOT_USERNAME}?start=duel_${activeDuelId}`;
 
@@ -480,7 +535,7 @@ function App() {
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <div className="modern-header" style={{ marginBottom: '30px' }}>
           <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📚 Выбери предмет</h2>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>📚 Предметы</h2>
         </div>
 
         <div className="subjects-grid-modern">
@@ -505,73 +560,6 @@ function App() {
           }}>📸 VIP: Решить задачу по фото</button>
         </div>
         <button className="modern-btn back-btn-outline" style={{ marginTop: '20px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
-      </div>
-    );
-  }
-  // ЭКРАН ВЫБОРА ПРЕДМЕТА ДЛЯ ДУЭЛИ
-  if (currentScreen === 'duel_subjects') {
-    const subjectsList = [
-      { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
-      { name: 'Геометрия', icon: '📐', colorClass: 'subj-green' },
-      { name: 'Аналогии', icon: '🔗', colorClass: 'subj-purple' },
-      { name: 'Дополнение предложений', icon: '📝', colorClass: 'subj-orange' },
-      { name: 'Чтение и понимание', icon: '📖', colorClass: 'subj-teal' },
-      { name: 'Грамматика', icon: '🅰️', colorClass: 'subj-red' }
-    ];
-    return (
-      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
-        <div className="modern-header" style={{ marginBottom: '30px' }}>
-          <div className="modern-logo">🧬 O.R.T. AI</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>⚔️ Выбери предмет</h2>
-          <p className="subtitle">По какому предмету бросим вызов?</p>
-        </div>
-
-
-        <div className="subjects-grid-modern">
-          {subjectsList.map(subj => (
-            <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleCreateDuel(subj.name)}>
-              <div className="subject-icon-glass">{subj.icon}</div>
-              <span className="subject-name-modern">{subj.name}</span>
-            </div>
-          ))}
-        </div>
-        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
-      </div>
-    );
-  }
-
-  // ЭКРАН ВЫБОРА КОЛИЧЕСТВА ЗАДАЧ (ОЧИЩЕН ОТ ДУЭЛЕЙ)
-  if (currentScreen === 'amount_select') {
-    return (
-      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{textAlign: 'center'}}>
-        <h2 className="title" style={{marginBottom: '15px'}}>{selectedSubject}</h2>
-
-        <div style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', marginBottom: '25px', border: `1px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
-           <p style={{marginBottom: '15px', fontWeight: 'bold', color: isDarkTheme ? '#fff' : '#111'}}>Режим прохождения:</p>
-           <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
-             <div onClick={() => setUseTimer(true)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: useTimer ? '#3aa1e9' : 'transparent', color: useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${useTimer ? '#3aa1e9' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>⏱ На время</div>
-             <div onClick={() => setUseTimer(false)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: !useTimer ? '#e74c3c' : 'transparent', color: !useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${!useTimer ? '#e74c3c' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>🧘 Без таймера</div>
-           </div>
-        </div>
-
-        <p className="subtitle" style={{marginBottom: '15px'}}>Сколько задач хочешь решить?</p>
-        <div className="buttons-column">
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
-          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
-        </div>
-      </div>
-    );
-  }
-
-        <p className="subtitle" style={{marginBottom: '15px'}}>Сколько задач хочешь решить?</p>
-        <div className="buttons-column">
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
-          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
-          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
-        </div>
       </div>
     );
   }
@@ -648,7 +636,6 @@ function App() {
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
         <h2 className="title" style={{textAlign: 'center', marginBottom: '20px'}}>🎉 Тест завершен!</h2>
 
-        {/* ЕСЛИ БЫЛА ДУЭЛЬ - показываем спец. сообщение */}
         {activeDuelId && (
           <div style={{background: '#fff5f5', border: '1px solid #ff4d4d', borderRadius: '12px', padding: '15px', marginBottom: '20px', textAlign: 'center'}}>
             <h3 style={{color: '#ff4d4d', margin: '0 0 5px 0'}}>⚔️ Твой ход в дуэли сделан!</h3>
@@ -735,7 +722,6 @@ function App() {
     const handleImageUpload = (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (event) => {
@@ -746,19 +732,11 @@ function App() {
           const MAX_WIDTH = 1000;
           let width = img.width;
           let height = img.height;
-
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
+          if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
+          canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-          setPhotoData(compressedBase64);
+          setPhotoData(canvas.toDataURL('image/jpeg', 0.8));
           setPhotoResult('');
         };
       };
@@ -772,15 +750,8 @@ function App() {
         body: JSON.stringify({ user_id: userId, image_base64: photoData })
       })
       .then(res => res.json())
-      .then(data => {
-        setPhotoResult(data.answer || "Не удалось получить ответ ИИ.");
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Ошибка при отправке фото на сервер.");
-        setLoading(false);
-      });
+      .then(data => { setPhotoResult(data.answer || "Не удалось получить ответ ИИ."); setLoading(false); })
+      .catch(() => { alert("Ошибка при отправке фото на сервер."); setLoading(false); });
     };
 
     return (
@@ -797,15 +768,10 @@ function App() {
               Открыть Камеру / Галерею
             </label>
             <input id="photo-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
-            <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '25px', lineHeight: '1.5' }}>
-              💡 <b>Совет:</b> Снимай при хорошем свете.<br/>Печатный текст или задачи с экрана<br/>распознаются лучше всего!<br/>
-                 <b>Помни:</b> ИИ может ошибаться по этому перепроверяй ответы
-            </p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <img src={photoData} alt="Предпросмотр" style={{ width: '100%', borderRadius: '16px', border: `2px solid ${isDarkTheme ? '#444' : '#eee'}` }} />
-
             {!photoResult ? (
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button className="modern-btn lang-btn" onClick={sendPhotoToAI} style={{ flex: 2, marginBottom: 0 }}>✨ Решить задачу</button>
@@ -864,55 +830,32 @@ function App() {
         </div>
 
         <div className="leaderboard-tabs">
-          <button
-            className={`tab-btn ${leaderboardTab === 'personal' ? 'active-tab' : ''}`}
-            onClick={() => setLeaderboardTab('personal')}
-          >
-            👤 Ученики
-          </button>
-          <button
-            className={`tab-btn ${leaderboardTab === 'schools' ? 'active-tab' : ''}`}
-            onClick={() => setLeaderboardTab('schools')}
-          >
-            🏫 Школы
-          </button>
+          <button className={`tab-btn ${leaderboardTab === 'personal' ? 'active-tab' : ''}`} onClick={() => setLeaderboardTab('personal')}>👤 Ученики</button>
+          <button className={`tab-btn ${leaderboardTab === 'schools' ? 'active-tab' : ''}`} onClick={() => setLeaderboardTab('schools')}>🏫 Школы</button>
         </div>
 
         <div className="profile-card-real" style={{ padding: '10px', borderRadius: '16px', background: 'transparent', boxShadow: 'none' }}>
           {leaderboardTab === 'personal' && (
             <div className="ranking-list">
-              {leaderboard.length === 0 ? (
-                <p style={{textAlign: 'center', color: '#888'}}>Пока нет данных.</p>
-              ) : (
-                leaderboard.map((user, idx) => (
+              {leaderboard.length === 0 ? <p style={{textAlign: 'center', color: '#888'}}>Пока нет данных.</p> : leaderboard.map((user, idx) => (
                   <div key={user.id} className="ranking-item">
                     <div className="rank-position">{idx < 3 ? medals[idx] : <span className="rank-number">{idx + 1}</span>}</div>
-                    <div className="rank-info">
-                      <b>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b>
-                    </div>
+                    <div className="rank-info"><b>{user.username ? `@${user.username}` : `Ученик #${user.id}`}</b></div>
                     <div className="rank-score">{user.total_score} <span style={{fontSize:'0.7rem'}}>pts</span></div>
                   </div>
-                ))
-              )}
+              ))}
             </div>
           )}
 
           {leaderboardTab === 'schools' && (
             <div className="ranking-list">
-              {schoolLeaderboard.length === 0 ? (
-                <p style={{textAlign: 'center', color: '#888'}}>Школы пока не набрали баллов.</p>
-              ) : (
-                schoolLeaderboard.map((school, idx) => (
+              {schoolLeaderboard.length === 0 ? <p style={{textAlign: 'center', color: '#888'}}>Школы пока не набрали баллов.</p> : schoolLeaderboard.map((school, idx) => (
                   <div key={idx} className="ranking-item school-item">
                     <div className="rank-position">{idx < 3 ? medals[idx] : <span className="rank-number">{idx + 1}</span>}</div>
-                    <div className="rank-info">
-                      <b>{school.school}</b>
-                      <span className="school-district">📍 {school.district} • 👥 Учеников: {school.students_count}</span>
-                    </div>
+                    <div className="rank-info"><b>{school.school}</b><span className="school-district">📍 {school.district} • 👥 Учеников: {school.students_count}</span></div>
                     <div className="rank-score school-score">{school.total_school_score} <span style={{fontSize:'0.7rem'}}>pts</span></div>
                   </div>
-                ))
-              )}
+              ))}
             </div>
           )}
         </div>
@@ -926,9 +869,6 @@ function App() {
     const helpInstructions = [
       { name: 'Учеба', icon: '📚', text: 'Жми «Тренировка», чтобы решать задачи.', colorClass: 'subj-blue' },
       { name: 'VIP', icon: '🤖', text: 'VIP: ИИ даст разбор ошибок в конце теста.', colorClass: 'subj-orange' },
-      { name: 'ID', icon: '👤', text: 'Твой ID нужен для оплаты VIP-статуса.', colorClass: 'subj-purple' },
-      { name: 'Язык', icon: '⚙️', text: 'Меняй язык в настройках Профиля.', colorClass: 'subj-green' },
-      { name: 'Тема', icon: '🌗', text: 'Переключай светлую и темную тему в Профиле.', colorClass: 'subj-teal' },
       { name: 'Топ-10', icon: '🏆', text: 'Решай задачи и поднимайся в таблице лидеров.', colorClass: 'subj-red' }
     ];
     return (
@@ -951,10 +891,7 @@ function App() {
         <div className="modern-dashboard-grid" style={{ marginBottom: '20px' }}>
            <div className="stat-card-modern vip-support-btn" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '15px', padding: '15px' }}>
               <div className="stat-icon-glass" style={{ minWidth: '45px' }}>📞</div>
-              <div className="stat-text" style={{ textAlign: 'left' }}>
-                <span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span>
-                <span className="stat-score help-subtitle">Связаться с нами</span>
-              </div>
+              <div className="stat-text" style={{ textAlign: 'left' }}><span className="stat-label help-title-modern" style={{ fontWeight: 'bold' }}>Поддержка</span><span className="stat-score help-subtitle">Связаться с нами</span></div>
               <a href="https://t.me/Altin_Supprot_bot" target="_blank" rel="noreferrer" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
                 <button className="modern-btn" style={{ padding: '8px 12px', fontSize: '0.9rem', width: 'auto', marginBottom: 0, background: '#3aa1e9', color: 'white' }}>@Support</button>
               </a>
@@ -975,33 +912,13 @@ function App() {
         </div>
         <div style={{overflowX: 'auto', marginBottom: '20px'}}>
           <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left'}}>
-            <thead>
-              <tr style={{borderBottom: `2px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
-                <th style={{padding: '10px'}}>ID / Имя</th>
-                <th style={{padding: '10px'}}>Статус</th>
-                <th style={{padding: '10px'}}>Школа</th>
-              </tr>
-            </thead>
+            <thead><tr style={{borderBottom: `2px solid ${isDarkTheme ? '#333' : '#eee'}`}}><th style={{padding: '10px'}}>ID / Имя</th><th style={{padding: '10px'}}>Статус</th><th style={{padding: '10px'}}>Школа</th></tr></thead>
             <tbody>
               {allUsers.map(user => (
                 <tr key={user.id} style={{borderBottom: `1px solid ${isDarkTheme ? '#222' : '#f9f9f9'}`}}>
-                  <td style={{padding: '10px'}}>
-                    <b>#{user.id}</b><br/>
-                    {user.real_name || `@${user.username}` || 'Инкогнито'}
-                  </td>
-                  <td style={{padding: '10px'}}>
-                    <span style={{
-                      padding: '2px 6px', borderRadius: '4px',
-                      background: user.role === 'vip' ? '#FFD700' : (user.role === 'admin' ? '#3aa1e9' : '#eee'),
-                      color: '#111', fontSize: '0.7rem', fontWeight: 'bold'
-                    }}>
-                      {user.role.toUpperCase()}
-                    </span>
-                  </td>
-                  <td style={{padding: '10px', color: '#888'}}>
-                    {user.district || '—'}<br/>
-                    {user.school ? `${user.school}` : '—'}
-                  </td>
+                  <td style={{padding: '10px'}}><b>#{user.id}</b><br/>{user.real_name || `@${user.username}` || 'Инкогнито'}</td>
+                  <td style={{padding: '10px'}}><span style={{ padding: '2px 6px', borderRadius: '4px', background: user.role === 'vip' ? '#FFD700' : (user.role === 'admin' ? '#3aa1e9' : '#eee'), color: '#111', fontSize: '0.7rem', fontWeight: 'bold' }}>{user.role.toUpperCase()}</span></td>
+                  <td style={{padding: '10px', color: '#888'}}>{user.district || '—'}<br/>{user.school ? `${user.school}` : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -1011,6 +928,7 @@ function App() {
       </div>
     );
   }
+
   // ЭКРАН ИСТОРИИ ДУЕЛЕЙ
   if (currentScreen === 'duel_history') {
     return (
@@ -1020,7 +938,7 @@ function App() {
           <p className="subtitle">Твои последние сражения</p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '80px' }}>
           {duelHistory.length === 0 ? (
             <p style={{ textAlign: 'center', color: '#888', marginTop: '30px' }}>Ты еще не участвовал в дуэлях. Пора бросить кому-нибудь вызов! ⚔️</p>
           ) : (
@@ -1033,19 +951,11 @@ function App() {
               let resultText = '🕒 В процессе...';
 
               if (isFinished) {
-                  if (isDraw) {
-                      resultColor = '#f39c12'; // Оранжевый для ничьей
-                      resultText = '🤝 Ничья';
-                  } else if (isMyWin) {
-                      resultColor = '#2ecc71'; // Зеленый для победы
-                      resultText = '🏆 Победа';
-                  } else {
-                      resultColor = '#e74c3c'; // Красный для поражения
-                      resultText = '💀 Поражение';
-                  }
+                  if (isDraw) { resultColor = '#f39c12'; resultText = '🤝 Ничья'; }
+                  else if (isMyWin) { resultColor = '#2ecc71'; resultText = '🏆 Победа'; }
+                  else { resultColor = '#e74c3c'; resultText = '💀 Поражение'; }
               }
 
-              // Функция для перевода секунд в минуты:секунды
               const formatTime = (sec) => {
                   if (sec === null || sec === undefined) return '--:--';
                   const m = Math.floor(sec / 60);
@@ -1054,49 +964,27 @@ function App() {
               };
 
               return (
-                <div key={duel.id} style={{
-                  background: isDarkTheme ? '#1e1e1e' : 'white',
-                  borderRadius: '16px',
-                  padding: '15px',
-                  borderLeft: `6px solid ${resultColor}`,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                  position: 'relative'
-                }}>
+                <div key={duel.id} style={{ background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', borderLeft: `6px solid ${resultColor}`, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: `1px solid ${isDarkTheme ? '#333' : '#eee'}`, paddingBottom: '10px' }}>
                      <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: isDarkTheme ? '#aaa' : '#888' }}>#{duel.id} • {duel.subject}</span>
                      <span style={{ fontWeight: '900', fontSize: '0.9rem', color: resultColor, textTransform: 'uppercase' }}>{resultText}</span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     {/* Игрок 1 (Создатель) */}
                      <div style={{ flex: 1, textAlign: 'center' }}>
                         <b style={{ color: isDarkTheme ? '#fff' : '#111', fontSize: '0.95rem' }}>{duel.creator_name || 'Инкогнито'}</b>
-                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#3aa1e9', margin: '5px 0' }}>
-                           {duel.creator_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span>
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>
-                           ⏱ {formatTime(duel.creator_time)}
-                        </div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#3aa1e9', margin: '5px 0' }}>{duel.creator_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span></div>
+                        <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>⏱ {formatTime(duel.creator_time)}</div>
                      </div>
-
-                     {/* Иконка мечей по центру */}
                      <div style={{ fontSize: '1.5rem', margin: '0 10px', color: isDarkTheme ? '#444' : '#eee' }}>⚔️</div>
-
-                     {/* Игрок 2 (Оппонент) */}
                      <div style={{ flex: 1, textAlign: 'center' }}>
                         <b style={{ color: isDarkTheme ? '#fff' : '#111', fontSize: '0.95rem' }}>{duel.opponent_name || 'Ожидает...'}</b>
                         {duel.opponent_name ? (
                           <>
-                            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#e74c3c', margin: '5px 0' }}>
-                               {duel.opponent_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>
-                               ⏱ {formatTime(duel.opponent_time)}
-                            </div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#e74c3c', margin: '5px 0' }}>{duel.opponent_score || 0} <span style={{fontSize:'0.7rem', color: '#888'}}>баллов</span></div>
+                            <div style={{ fontSize: '0.8rem', color: '#888', background: isDarkTheme ? '#2a2a2a' : '#f4f7fb', padding: '4px', borderRadius: '6px', display: 'inline-block' }}>⏱ {formatTime(duel.opponent_time)}</div>
                           </>
-                        ) : (
-                          <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px', fontStyle: 'italic' }}>Ссылка отправлена</div>
-                        )}
+                        ) : <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px', fontStyle: 'italic' }}>Ссылка отправлена</div>}
                      </div>
                   </div>
                 </div>
@@ -1104,26 +992,10 @@ function App() {
             })
           )}
         </div>
+
         {/* ПЛАВАЮЩАЯ КНОПКА "НАЗАД" */}
         <button
-          style={{
-            position: 'fixed',
-            bottom: '30px',
-            right: '20px',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: '#3aa1e9',
-            color: 'white',
-            border: 'none',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.8rem',
-            cursor: 'pointer',
-            zIndex: 1000
-          }}
+          style={{ position: 'fixed', bottom: '30px', right: '20px', width: '60px', height: '60px', borderRadius: '50%', background: '#3aa1e9', color: 'white', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', cursor: 'pointer', zIndex: 1000 }}
           onClick={() => setCurrentScreen('main')}
         >
           🔙
@@ -1131,6 +1003,7 @@ function App() {
       </div>
     );
   }
+
   return null;
 }
 
