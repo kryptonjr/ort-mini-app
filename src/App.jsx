@@ -526,6 +526,7 @@ function App() {
           <p className="subtitle">По какому предмету бросим вызов?</p>
         </div>
 
+
         <div className="subjects-grid-modern">
           {subjectsList.map(subj => (
             <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleCreateDuel(subj.name)}>
