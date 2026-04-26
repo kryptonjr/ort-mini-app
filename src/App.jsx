@@ -343,24 +343,59 @@ function App() {
         )}
         <div className="modern-header"><div className="modern-logo">🧬 O.R.T. AI</div><h2>Привет, {userData?.first_name || 'Ученик'}!</h2></div>
 
-        {/* КАРТОЧКИ ГЛАВНОГО ЭКРАНА */}
+        {/* 1. КАРТОЧКА ТРЕНИРОВКИ */}
         <div className="main-action-card" onClick={() => { setActiveDuelId(null); setCurrentScreen('training'); }}>
           <div className="card-icon-large">📖</div>
           <div className="card-text"><h3>Тренировка</h3><p>Начать подготовку</p></div>
         </div>
 
+        {/* 2. КАРТОЧКА ДУЭЛЕЙ */}
+        <div className="main-action-card" style={{ background: 'linear-gradient(135deg, #ff7675, #d63031)', marginTop: '-10px' }} onClick={() => setCurrentScreen('duel_subjects')}>
+          <div className="card-icon-large" style={{ background: 'rgba(0,0,0,0.1)' }}>⚔️</div>
+          <div className="card-text"><h3>Дуэли</h3><p>Сразись с друзьями</p></div>
+        </div>
 
-        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        {/* 3. КАРТОЧКА ИСТОРИИ */}
+        <div className="main-action-card" style={{ background: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', marginTop: '-10px' }} onClick={() => {
+            setLoading(true);
+            fetch(`${API_URL}/get_my_duels?user_id=${userId}`)
+              .then(res => res.json())
+              .then(data => {
+                setDuelHistory(data);
+                setCurrentScreen('duel_history');
+                setLoading(false);
+              });
+        }}>
+          <div className="card-icon-large" style={{ background: 'rgba(0,0,0,0.1)' }}>📜</div>
+          <div className="card-text"><h3>История дуэлей</h3><p>Твои результаты</p></div>
+        </div>
+
+        {/* СЕТКА (Возвращаем ей 3 колонки, так как Историю мы отсюда забрали) */}
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}>
             <div className="dash-icon">{getProfileIcon()}</div>
             <h4>Профиль</h4>
+            <p>{totalScore} баллов</p>
+          </div>
+          <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
+            <div className="dash-icon">🆘</div>
+            <h4>Помощь</h4>
+            <p>Инструкции</p>
           </div>
           <div className="dash-card leader-card" onClick={() => {
-             // ... существующий код загрузки лидерборда ...
+            setLoading(true);
+            Promise.all([
+              fetch(`${API_URL}/get_leaderboard`).then(res => res.json()),
+              fetch(`${API_URL}/get_school_leaderboard`).then(res => res.json())
+            ]).then(([usersData, schoolsData]) => {
+              setLeaderboard(usersData); setSchoolLeaderboard(schoolsData); setCurrentScreen('leaderboard'); setLoading(false);
+            }).catch(() => setLoading(false));
           }}>
             <div className="dash-icon">🏆</div>
             <h4>ТОП-10</h4>
+            <p>Лидеры</p>
           </div>
+        </div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}>
             <div className="dash-icon">🆘</div>
             <h4>Помощь</h4>
@@ -483,29 +518,61 @@ function App() {
       </div>
     );
   }
+  // ЭКРАН ВЫБОРА ПРЕДМЕТА ДЛЯ ДУЭЛИ
+  if (currentScreen === 'duel_subjects') {
+    const subjectsList = [
+      { name: 'Алгебра', icon: '🧮', colorClass: 'subj-blue' },
+      { name: 'Геометрия', icon: '📐', colorClass: 'subj-green' },
+      { name: 'Аналогии', icon: '🔗', colorClass: 'subj-purple' },
+      { name: 'Дополнение предложений', icon: '📝', colorClass: 'subj-orange' },
+      { name: 'Чтение и понимание', icon: '📖', colorClass: 'subj-teal' },
+      { name: 'Грамматика', icon: '🅰️', colorClass: 'subj-red' }
+    ];
+    return (
+      <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
+        <div className="modern-header" style={{ marginBottom: '30px' }}>
+          <div className="modern-logo">🧬 O.R.T. AI</div>
+          <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>⚔️ Выбери предмет</h2>
+          <p className="subtitle">По какому предмету бросим вызов?</p>
+        </div>
 
-  // ЭКРАН ВЫБОРА КОЛИЧЕСТВА ЗАДАЧ
+        <div className="subjects-grid-modern">
+          {subjectsList.map(subj => (
+            <div key={subj.name} className={`subject-card-modern ${subj.colorClass}`} onClick={() => handleCreateDuel(subj.name)}>
+              <div className="subject-icon-glass">{subj.icon}</div>
+              <span className="subject-name-modern">{subj.name}</span>
+            </div>
+          ))}
+        </div>
+        <button className="modern-btn back-btn-outline" style={{ marginTop: '30px' }} onClick={() => setCurrentScreen('main')}>⬅ Назад</button>
+      </div>
+    );
+  }
+
+  // ЭКРАН ВЫБОРА КОЛИЧЕСТВА ЗАДАЧ (ОЧИЩЕН ОТ ДУЭЛЕЙ)
   if (currentScreen === 'amount_select') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`} style={{textAlign: 'center'}}>
         <h2 className="title" style={{marginBottom: '15px'}}>{selectedSubject}</h2>
 
-        {/* КНОПКА СОЗДАНИЯ ДУЭЛИ */}
-        <div style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '20px', marginBottom: '25px', border: `2px dashed #e74c3c`, boxShadow: '0 4px 15px rgba(231, 76, 60, 0.1)'}}>
-           <h3 style={{color: '#e74c3c', marginBottom: '10px'}}>⚔️ Соревнование</h3>
-           <p style={{fontSize: '0.9rem', color: isDarkTheme ? '#aaa' : '#666', marginBottom: '15px'}}>Брось вызов другу и узнай, кто решит 5 задач быстрее и правильнее!</p>
-           <button className="modern-btn" style={{background: '#e74c3c', color: 'white', margin: 0}} onClick={() => handleCreateDuel(selectedSubject)}>
-             🔥 СОЗДАТЬ ДУЭЛЬ
-           </button>
-        </div>
-
         <div style={{background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', marginBottom: '25px', border: `1px solid ${isDarkTheme ? '#333' : '#eee'}`}}>
-           <p style={{marginBottom: '15px', fontWeight: 'bold', color: isDarkTheme ? '#fff' : '#111'}}>Одиночный режим:</p>
+           <p style={{marginBottom: '15px', fontWeight: 'bold', color: isDarkTheme ? '#fff' : '#111'}}>Режим прохождения:</p>
            <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
              <div onClick={() => setUseTimer(true)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: useTimer ? '#3aa1e9' : 'transparent', color: useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${useTimer ? '#3aa1e9' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>⏱ На время</div>
              <div onClick={() => setUseTimer(false)} style={{padding: '12px 10px', borderRadius: '12px', cursor: 'pointer', background: !useTimer ? '#e74c3c' : 'transparent', color: !useTimer ? 'white' : (isDarkTheme ? '#aaa' : '#666'), border: `2px solid ${!useTimer ? '#e74c3c' : (isDarkTheme ? '#444' : '#eee')}`, flex: 1, fontWeight: 'bold', fontSize: '0.9rem'}}>🧘 Без таймера</div>
            </div>
         </div>
+
+        <p className="subtitle" style={{marginBottom: '15px'}}>Сколько задач хочешь решить?</p>
+        <div className="buttons-column">
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(5)}>5 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(10)}>10 задач</button>
+          <button className="modern-btn" style={{background: '#4b6584', color: 'white'}} onClick={() => handleStartTest(15)}>15 задач</button>
+          <button className="modern-btn back-btn-outline" style={{marginTop: '20px'}} onClick={() => setCurrentScreen('training')}>⬅ Отмена</button>
+        </div>
+      </div>
+    );
+  }
 
         <p className="subtitle" style={{marginBottom: '15px'}}>Сколько задач хочешь решить?</p>
         <div className="buttons-column">
@@ -1046,7 +1113,30 @@ function App() {
             })
           )}
         </div>
-        <button className="modern-btn back-btn-outline" style={{ marginTop: '25px' }} onClick={() => setCurrentScreen('main')}>⬅ На главную</button>
+        {/* ПЛАВАЮЩАЯ КНОПКА "НАЗАД" */}
+        <button
+          style={{
+            position: 'fixed',
+            bottom: '30px',
+            right: '20px',
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            background: '#3aa1e9',
+            color: 'white',
+            border: 'none',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.8rem',
+            cursor: 'pointer',
+            zIndex: 1000
+          }}
+          onClick={() => setCurrentScreen('main')}
+        >
+          🔙
+        </button>
       </div>
     );
   }
