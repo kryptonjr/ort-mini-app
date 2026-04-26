@@ -348,6 +348,22 @@ function App() {
           <div className="card-text"><h3>Тренировка</h3><p>Начать подготовку</p></div>
         </div>
 
+        {/* НОВАЯ КНОПКА ПРИСОЕДИНИТЬСЯ К ДУЭЛИ */}
+        <div className="main-action-card" style={{ background: 'linear-gradient(135deg, #ff7675, #d63031)', marginTop: '-10px' }} onClick={() => {
+            const input = prompt("Вставь ссылку-приглашение или просто номер дуэли (например, 5):");
+            if (!input) return;
+            const match = input.match(/\d+/); // Ищем любые цифры в тексте
+            if (match) {
+              setActiveDuelId(match[0]);
+              setCurrentScreen('duel_lobby');
+            } else {
+              alert("❌ Не удалось найти номер дуэли в тексте!");
+            }
+        }}>
+          <div className="card-icon-large" style={{ background: 'rgba(0,0,0,0.1)' }}>⚔️</div>
+          <div className="card-text"><h3>Принять вызов</h3><p>Ввести код дуэли</p></div>
+        </div>
+
         <div className="dashboard-grid">
           <div className="dash-card profile-card" onClick={() => setCurrentScreen('profile')}><div className="dash-icon">{getProfileIcon()}</div><h4>Профиль</h4><p>{totalScore} баллов</p></div>
           <div className="dash-card help-card" onClick={() => setCurrentScreen('help')}><div className="dash-icon">🆘</div><h4>Помощь</h4><p>Инструкции</p></div>
