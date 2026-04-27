@@ -6,7 +6,7 @@ const tg = window.Telegram.WebApp;
 const API_URL = "https://ort-bot.ru";
 
 // ИМЯ БОТА (Нужно для генерации ссылок-приглашений на дуэль)
-const BOT_USERNAME = "ORT_Altin_Test_bot";
+const BOT_USERNAME = "Altin_Tutor_bot";
 
 function App() {
   // === ОСНОВНЫЕ СОСТОЯНИЯ ===
