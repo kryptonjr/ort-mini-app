@@ -936,7 +936,7 @@ function App() {
     );
   }
 
-  // ЭКРАН ИСТОРИИ ДУЕЛЕЙ (С ПЛАВАЮЩЕЙ КНОПКОЙ НАЗАД)
+  // ЭКРАН ИСТОРИИ ДУЕЛЕЙ (С ПЛАВАЮЩЕЙ КНОПКОЙ И КЛИКАБЕЛЬНЫМИ КАРТОЧКАМИ)
   if (currentScreen === 'duel_history') {
     return (
       <div className={`app-container modern-ui ${isDarkTheme ? 'dark-theme' : ''}`}>
@@ -971,7 +971,6 @@ function App() {
               };
 
               return (
-                return (
                 <div key={duel.id}
                   onClick={() => {
                     // Если дуэль не закончена, по клику возвращаемся в Лобби!
