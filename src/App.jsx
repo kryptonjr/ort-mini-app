@@ -971,7 +971,24 @@ function App() {
               };
 
               return (
-                <div key={duel.id} style={{ background: isDarkTheme ? '#1e1e1e' : 'white', borderRadius: '16px', padding: '15px', borderLeft: `6px solid ${resultColor}`, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                return (
+                <div key={duel.id}
+                  onClick={() => {
+                    // Если дуэль не закончена, по клику возвращаемся в Лобби!
+                    if (!isFinished) {
+                      setActiveDuelId(duel.id);
+                      setSelectedSubject(duel.subject);
+                      setCurrentScreen('duel_lobby');
+                    }
+                  }}
+                  style={{
+                    background: isDarkTheme ? '#1e1e1e' : 'white',
+                    borderRadius: '16px',
+                    padding: '15px',
+                    borderLeft: `6px solid ${resultColor}`,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                    cursor: !isFinished ? 'pointer' : 'default'
+                  }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: `1px solid ${isDarkTheme ? '#333' : '#eee'}`, paddingBottom: '10px' }}>
                      <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: isDarkTheme ? '#aaa' : '#888' }}>#{duel.id} • {duel.subject}</span>
                      <span style={{ fontWeight: '900', fontSize: '0.9rem', color: resultColor, textTransform: 'uppercase' }}>{resultText}</span>
